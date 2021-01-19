@@ -3,7 +3,8 @@ import json
             
 class Parser:
     @staticmethod
-    def parse_file_csv_to_dict(file):
+    def parse_csv_file_to_json(file):
+        # Flaw: highly specialized
         with open(file, "r") as data:
             reader = list(csv.reader(data, delimiter=","))
 
@@ -29,6 +30,6 @@ class Parser:
             json.dump(data, file, indent=4)
 
     @staticmethod
-    def load_data_from_json_file(file):
+    def load_data_from_json_file(file): # really the most important function
         with open(file, "r") as f:
             return json.loads(f.read())
