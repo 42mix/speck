@@ -6,17 +6,20 @@ class Forecatser:
     def __init__(self, data):
         self.data = data
 
-    def forecast_max_temp_c(self, date):
-        date_year, date_month, date_day = (int(i) for i in date.split('-'))
+    def forecast_max_temp_c(self, date, accuracy):
+        _, date_month, date_day = (int(i) for i in date.split('-'))
+        date_year = 2019 - accuracy
 
-        weeks = [[[], []], [[], []], [[], []]]
+        weeks = []
 
-        for i in weeks:
-            date_year -= 1
+        for i in range(min(accuracy, 10)):
+            weeks.append([[], []])
+
+            date_year += 1
             date = datetime(date_year, date_month, date_day)
 
             for j in range(-6, 1):
-                i[0].append(
+                weeks[i][0].append(
                     self.data.raw_data[
                         "{:04d}-{:02d}-{:02d} 00:00:00".format(date.year, date.month, (date + timedelta(days=1)).day)
                     ]
@@ -24,7 +27,7 @@ class Forecatser:
             )
 
             for j in range(1, 8):
-                i[1].append(
+                weeks[i][1].append(
                     self.data.raw_data[
                         "{:04d}-{:02d}-{:02d} 00:00:00".format(date.year, date.month, (date + timedelta(days=1)).day)
                     ]
@@ -32,7 +35,7 @@ class Forecatser:
             )
 
         for i in range(len(weeks[0][0])):
-            print(weeks[0][0][i], weeks[1][0][i], weeks[2][0][i])        
+            print([weeks[j][0][i] for j in range(len(weeks))])
 
         for i in range(len(weeks[0][1])):
-            print(weeks[0][1][i], weeks[1][1][i], weeks[2][1][i])
+            print([weeks[j][1][i] for j in range(len(weeks))])

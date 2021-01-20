@@ -17,17 +17,16 @@ class Parser:
             # }
 
             for row in reader[1:]: # Exclude column headers
-                if int(row[0].split("-")[0]) > 2015: # Data only from 2016
-                    data_json[row[0]] = {  }
-                    for index, col in enumerate(row[1:]):
-                        data_json[row[0]][reader[0][index + 1]] = col
+                data_json[row[0]] = {  }
+                for index, col in enumerate(row[1:]):
+                    data_json[row[0]][reader[0][index + 1]] = col
                         
             return data_json
 
     @staticmethod
     def dump_json_to_file(data, file):
         with open(file, "w") as f:
-            json.dump(data, file, indent=4)
+            json.dump(data, f, indent=4)
 
     @staticmethod
     def load_data_from_json_file(file): # really the most important function
