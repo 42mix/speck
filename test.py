@@ -1,4 +1,5 @@
 from forecaster.forecaster import Forecaster as Fs
+from forecaster.data import Data
 
 import json
 
@@ -10,13 +11,12 @@ def format_inaccuracy_score(score): # Make stuff prettier
     else:
         return f"\033[91m{score}\033[0m"
 
-def test_daily(param, year):
-    forecaster = Fs("bengaluru")
+def test_daily(city, param, year):
+    forecaster = Fs(city)
 
     inaccuracy_score = 0
 
-    with open("data/parsed/bengaluru.json", "r") as f:
-        data = json.load(f)
+    data = Data(f"data/parsed/{city}.json")
 
     for i in range(1, 13):
         for j in range(1, 29):
@@ -25,7 +25,7 @@ def test_daily(param, year):
 
             diff = abs(predicted - int(actual))
 
-            if diff > 3:
+            if diff > 5:
                 inaccuracy_score += 1
 
     print(f"({param}) \033[1m\033[92mDaily score {year}: {format_inaccuracy_score(inaccuracy_score)}")
@@ -33,8 +33,8 @@ def test_daily(param, year):
 def test_complete():
     print("\033[1m\033[93m[WARNING] Complete test may use up a lot of CPU\033[0m")
     for i in range(2010, 2020):
-        test_daily("maxtempC", i)
-        test_daily("mintempC", i)
+        test_daily("delhi", "maxtempC", i)
+        test_daily("delhi", "mintempC", i)
 
 if __name__ == "__main__":
     test_complete()

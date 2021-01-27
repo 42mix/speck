@@ -11,10 +11,10 @@ class Data:
             file_name = data.split("/")[-1].split("\\")[-1].split(".")[0] # Very clean, yes
 
             try:
-                Parser.load_json(file_name) # try to load parsed weather data
+                Parser.load_json(f"data/parsed/{file_name}.json") # try to load parsed weather data
             except:
-                self.data = Parser.parse_csv(data, f"data/parsed/{file_name}.json")
-                Parser.dump_json(self.data) # save so it doesn't need to be parsed at runtime again
+                self.data = Parser.parse_csv(f"data/raw/{file_name}.csv")
+                Parser.dump_json(self.data, f"data/parsed/{file_name}.json") # save so it doesn't need to be parsed at runtime again
 
     def __getitem__(self, key):
         return self.data[key]
