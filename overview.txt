@@ -1,0 +1,24 @@
+Date to be predicted: Jan 28 2021
+
+a = Jan 21 - Feb 7 2009
+b = Jan 21 - Feb 7 2010
+...
+j = Jan 21 - Feb 7 2019
+
+x = Jan 27 2021
+
+avg = (a + b ... j) / 10
+
+prediction = (avg + j + x) / 3
+
+=====================================
+
+Date to be predicted: March 23 2022
+
+a = March 16 - March 30 2009
+b = March 16 - March 30 2010
+...
+j = March 16 - March 30 2019
+
+avg = (a + b ... j) / 10
+

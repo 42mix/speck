@@ -16,19 +16,16 @@ class Forecaster:
         weeks = []
         fortnight_avgs = []
 
-        date_year = 2009
-
-        for i in range(date.year - 2009):
+        for date_year in range(2009, min(date.year + 1, 2020)):
             weeks.append([])
 
-            date_year += 1
-            date = datetime(date_year, date.month, date.day)
+            ndate = datetime(date_year, date.month, date.day)
 
             for j in range(-6, 8):
-                weeks[i].append(
+                weeks[-1].append(
                     int(
                         self.data[
-                            "{:04d}-{:02d}-{:02d} 00:00:00".format(date.year, date.month, (date + timedelta(days=1)).day)
+                            "{:04d}-{:02d}-{:02d} 00:00:00".format(ndate.year, ndate.month, (ndate + timedelta(days=1)).day)
                         ]
                         [param]
                     )
@@ -47,9 +44,9 @@ class Forecaster:
 
         base = "http://api.openweathermap.org/data/2.5/weather?"
 
-        req = f"{base}appid={token}&q={self.city}"
+        req = f"{base}appid={token}&q={self.city}" # http://api.openweathermap.org/data/2.5/weather?appid=&q=delhi
 
-        response = requests.get(req).json()
+        response = requests.get(req).json() # Requests data from openweathermap.org
 
         if response["cod"] != "404":
             return response
@@ -98,7 +95,7 @@ class Forecaster:
                 pass
             except Exception as e: # Something else
                 raise Exception
-            
+
         # Prediction without current data ----------
 
         # Max Temperature ----------------------
