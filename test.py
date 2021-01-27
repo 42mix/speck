@@ -20,12 +20,12 @@ def test_daily(city, param, year):
 
     for i in range(1, 13):
         for j in range(1, 29):
-            predicted = forecaster.forecast_overall("{:04d}-{:02d}-{:02d}".format(year, i, j), accuracy=8, token_path="token.txt")[param]
+            predicted = forecaster.forecast_overall("{:04d}-{:02d}-{:02d}".format(year, i, j), token_path="token.txt")[param]
             actual = data["{:04d}-{:02d}-{:02d} 00:00:00".format(year, i, j)][param]
 
             diff = abs(predicted - int(actual))
 
-            if diff > 5:
+            if diff > 4:
                 inaccuracy_score += 1
 
     print(f"({param}) \033[1m\033[92mDaily score {year}: {format_inaccuracy_score(inaccuracy_score)}")

@@ -11,14 +11,14 @@ class Forecaster:
         self.data = data if data else Data(f"{data_path}/{city}.json")
         self.city = city
 
-    def __historic_fornight_avg(self, date, accuracy, param):
+    def __historic_fornight_avg(self, date, param):
         """Get historic average for `parameter` around a two week range for each year based on accuracy value."""
         weeks = []
         fortnight_avgs = []
 
-        date_year = 2019 - accuracy
+        date_year = 2009
 
-        for i in range(min(accuracy, date.year - 2009)):
+        for i in range(date.year - 2009):
             weeks.append([])
 
             date_year += 1
@@ -56,7 +56,7 @@ class Forecaster:
         else:
             raise ValueError("OpenWeatherMap error - 404") # For now
 
-    def forecast_overall(self, date, accuracy, token_path=None):
+    def forecast_overall(self, date, token_path=None):
         """
         Forecast's all weather parameters for given date.
 
@@ -82,13 +82,13 @@ class Forecaster:
         if not ignore_current_data:
             try:
                 # Max Temperature ----------------------
-                fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "maxtempC")
+                fornight_avg_max_temp = self.__historic_fornight_avg(date, "maxtempC")
                 current_max_temp      = self.get_current_data(token_path)["main"]["temp_max"] - 273.15 if token_path else None
 
                 predicted["maxtempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + current_max_temp) / 2
 
                 # Min Temperature ----------------------
-                fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "mintempC")
+                fornight_avg_max_temp = self.__historic_fornight_avg(date, "mintempC")
                 current_max_temp      = self.get_current_data(token_path)["main"]["temp_min"] - 273.15 if token_path else None
 
                 predicted["mintempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + current_max_temp) / 2
@@ -102,12 +102,12 @@ class Forecaster:
         # Prediction without current data ----------
 
         # Max Temperature ----------------------
-        fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "maxtempC")
+        fornight_avg_max_temp = self.__historic_fornight_avg(date, "maxtempC")
 
         predicted["maxtempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + fornight_avg_max_temp[-1]) / 2
 
         # Min Temperature ----------------------
-        fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "mintempC")
+        fornight_avg_max_temp = self.__historic_fornight_avg(date, "mintempC")
 
         predicted["mintempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + fornight_avg_max_temp[-1]) / 2
 
