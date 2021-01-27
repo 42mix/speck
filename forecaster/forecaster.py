@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date as dt
 from datetime import timedelta
 
 import requests
@@ -11,19 +11,18 @@ class Forecaster:
         self.data = data if data else Data(f"{data_path}/{city}.json")
         self.city = city
 
-    def ___historic_fornight_avg(self, date, accuracy, param):
+    def __historic_fornight_avg(self, date, accuracy, param):
         """Get historic average for `parameter` around a two week range for each year based on accuracy value."""
-        _, date_month, date_day = (int(i) for i in date.split('-'))
-        date_year = 2019 - accuracy
-
         weeks = []
         fortnight_avgs = []
+
+        date_year = 2019 - accuracy
 
         for i in range(min(accuracy, 10)):
             weeks.append([])
 
             date_year += 1
-            date = datetime(date_year, date_month, date_day)
+            date = datetime(date_year, date.month, date.day)
 
             for j in range(-6, 8):
                 weeks[i].append(
@@ -55,7 +54,7 @@ class Forecaster:
         if response["cod"] != "404":
             return response
         else:
-            return ValueError # For now
+            raise ValueError("OpenWeatherMap error - 404") # For now
 
     def forecast_overall(self, date, accuracy, token_path=None):
         """
@@ -67,7 +66,35 @@ class Forecaster:
         * `accuracy` - Years of historic data to include. Maximum is 10.
         * `token_path` - Path to file containing OpenWeatherMap API key. Ignore if current data is to be ignored.
         """
-        fornight_avg_max_temp = self.___historic_fornight_avg(date, accuracy, "maxtempC")
-        current_max_temp      = self.get_current_data(token_path)["main"]["temp_max"] - 273.15 if token_path else None
+        ignore_current_data = False
 
-        print(fornight_avg_max_temp, current_max_temp) # For now
+        predicted = {}
+
+        date_year, date_month, date_day = (int(i) for i in date.split('-'))
+        date = datetime(date_year, date_month, date_day)
+
+        if abs(date - datetime.now()) > timedelta(days=14): # Current date outside a 2 week range of prediction.
+            ignore_current_data = True                      # Using current data will be inaccurate
+
+        if not token_path:
+            ignore_current_data = True
+
+        if not ignore_current_data:
+            try:
+                fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "maxtempC")
+                current_max_temp      = self.get_current_data(token_path)["main"]["temp_max"] - 273.15 if token_path else None
+
+                predicted["maxtempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + current_max_temp) / 2
+
+                return predicted
+            except ValueError: # OpenWeatherMap not accessible
+                pass
+            except Exception as e: # Something else
+                raise Exception
+            
+        # Prediction without current data ----------
+        fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "maxtempC")
+
+        predicted["maxtempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + fornight_avg_max_temp[-1]) / 2
+
+        return predicted
