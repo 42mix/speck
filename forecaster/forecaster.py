@@ -18,7 +18,7 @@ class Forecaster:
 
         date_year = 2019 - accuracy
 
-        for i in range(min(accuracy, 10)):
+        for i in range(min(accuracy, date.year - 2009)):
             weeks.append([])
 
             date_year += 1
@@ -81,10 +81,17 @@ class Forecaster:
 
         if not ignore_current_data:
             try:
+                # Max Temperature ----------------------
                 fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "maxtempC")
                 current_max_temp      = self.get_current_data(token_path)["main"]["temp_max"] - 273.15 if token_path else None
 
                 predicted["maxtempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + current_max_temp) / 2
+
+                # Min Temperature ----------------------
+                fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "mintempC")
+                current_max_temp      = self.get_current_data(token_path)["main"]["temp_min"] - 273.15 if token_path else None
+
+                predicted["mintempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + current_max_temp) / 2
 
                 return predicted
             except ValueError: # OpenWeatherMap not accessible
@@ -93,8 +100,15 @@ class Forecaster:
                 raise Exception
             
         # Prediction without current data ----------
+
+        # Max Temperature ----------------------
         fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "maxtempC")
 
         predicted["maxtempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + fornight_avg_max_temp[-1]) / 2
+
+        # Min Temperature ----------------------
+        fornight_avg_max_temp = self.__historic_fornight_avg(date, accuracy, "mintempC")
+
+        predicted["mintempC"] = ((sum(fornight_avg_max_temp) / len(fornight_avg_max_temp)) + fornight_avg_max_temp[-1]) / 2
 
         return predicted
