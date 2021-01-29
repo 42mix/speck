@@ -132,4 +132,5 @@ dmypy.json
 # OpenWeatherMap API key
 token.txt
 
-data/parsed/*.json
+sample.json
+cache/*
