@@ -1,5 +1,5 @@
 # SPECK
-School computer sciene project to forecast weather locally.
+School computer science project to forecast weather locally.
 
 Tests
 -----
