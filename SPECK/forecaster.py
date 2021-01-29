@@ -37,20 +37,54 @@ class Forecaster:
             return None
 
     def current_weather_in(self, city):
-        """Get current weather data for the internal city. Path to openweathermap api key must be provided."""
+        """
+        Get current weather conditions in a city.
+
+        Paramters
+        ---------
+        * **city:** Query parameter based on which data is sent back. It could be following:
+
+                    - Latitude and Longitude (Decimal degree). e.g.:'48.8567,2.3508'
+                    - city name e.g.: 'Paris'
+                    - US zip e.g.: '10001'
+                    - UK postcode e.g: 'SW1'
+                    - Canada postal code e.g: 'G2J'
+                    - metar:<metar code> e.g: 'metar:EGLL'
+                    - iata:<3 digit airport code> e.g: 'iata:DXB'
+                    - auto:ip IP lookup e.g: 'auto:ip'
+                    - IP address (IPv4 and IPv6 supported) e.g: '100.0.0.1'
+        """
         mode = f"forecast-{str(dt.now()).split('.')[0][:-4]}"
 
         if (n := Forecaster.__find_cache(city, mode)):
             return n
 
-        req = f"http://api.weatherapi.com/v1/current.json?key={selftoken}&q={city}"
+        req = f"http://api.weatherapi.com/v1/current.json?key={token}&q={city}"
 
         response = requests.get(req).json()
         Forecaster.__dump_cache(city, f"forecast-{mode}", response)
         return response
 
     def forecast_for(self, city, days=7):
-        """Get current weather data for the internal city. Path to openweathermap api key must be provided."""
+        """
+        API request to weatherapi.com for future weather forecast.
+
+        Paramters
+        ---------
+        * **city:** Query parameter based on which data is sent back. It could be following:
+
+                    - Latitude and Longitude (Decimal degree). e.g.:'48.8567,2.3508'
+                    - city name e.g.: 'Paris'
+                    - US zip e.g.: '10001'
+                    - UK postcode e.g: 'SW1'
+                    - Canada postal code e.g: 'G2J'
+                    - metar:<metar code> e.g: 'metar:EGLL'
+                    - iata:<3 digit airport code> e.g: 'iata:DXB'
+                    - auto:ip IP lookup e.g: 'auto:ip'
+                    - IP address (IPv4 and IPv6 supported) e.g: '100.0.0.1'
+
+        * **days:** Number of days to forecast for. Maximum is 10.
+        """
         mode = str(dt.now()).split()[0]
 
         if (n := Forecaster.__find_cache(city, mode)):
