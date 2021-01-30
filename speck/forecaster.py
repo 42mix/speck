@@ -89,8 +89,8 @@ class Forecaster:
         if (n := Forecaster.__find_cache(city, mode)):
             return n
 
-        req = f"http://api.weatherapi.com/v1/forecast.json?key={self.token}&q={city}&days={max(days, 10)}"
+        req = f"http://api.weatherapi.com/v1/forecast.json?key={self.token}&q={city}&days={min(days, 10)}"
 
         response = requests.get(req).json()
         Forecaster.__dump_cache(city, f"forecast-{mode}-{days}", response)
-        return response
+        return response["forecast"]["forecastday"]
