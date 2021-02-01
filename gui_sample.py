@@ -3,10 +3,17 @@ Example usage file for SPECK
 """
 from speck.forecaster import Forecaster as Fs
 
+import json
+
 with open("token.txt", "r") as f: # Your token is your "password" to be able to use the weatherapi.com API
     token = f.read()              # In this case, it is stored in a file locally for security reasons
 
 fster = Fs(token) # Create a "Forecaster" object.
+
+# -------------------------------------
+# Current weather
+# -------------------------------------
+
 ln = fster.current_weather_in("London")
 
 # Now, we print all available attributes for the current weather
@@ -45,3 +52,10 @@ print("Precipitation in London", ln["current"]["precip_in"]) # Precipitation in 
 
 print("Visibility in London", ln["current"]["vis_km"]) # vis_miles also available
 print("UV index in London", ln["current"]["uv"]) # UV index
+
+# -------------------------------------
+# Forecast weather
+# -------------------------------------
+
+lp = fster.forecast_for("London", days=7)
+
