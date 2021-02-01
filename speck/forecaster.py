@@ -1,14 +1,14 @@
 import json
-import requests
+import requests # Module that allows you to make reqs
 
-import os
-from pathlib import Path
+import os       # Utility
+from pathlib import Path # Utility
 
 from datetime import datetime as dt
 
 from . import errors
 
-class Forecaster:
+class Forecaster: # This is something like str or int
     def __init__(self, token):
         self.token = token
 
@@ -22,9 +22,9 @@ class Forecaster:
 
     @staticmethod
     def __dump_cache(city, mode, data):
-        Forecaster.__cleanup_cache(city, mode)
+        Forecaster.__cleanup_cache(city, mode) # Just to save space
 
-        Path(f"cache/{mode.split('-')[0]}").mkdir(parents=True, exist_ok=True)
+        Path(f"cache/{mode.split('-')[0]}").mkdir(parents=True, exist_ok=True) # creates cache folder
         
         with open(f"cache/{mode.split('-')[0]}/{city}-{mode}.json", "w") as f:
             json.dump(data, f)
@@ -32,7 +32,7 @@ class Forecaster:
     @staticmethod
     def __cleanup_cache(city, mode):
         try:
-            for i in os.listdir(f"cache/{mode.split('-')[0]}"):
+            for i in os.listdir(f"cache/{mode.split('-')[0]}"): # lists all the files in the current folder dir - folder listfolder
                 os.remove(f"cache/{mode.split('-')[0]}/{i}")
         except FileNotFoundError:
             return None
@@ -83,7 +83,7 @@ class Forecaster:
                     - auto:ip IP lookup e.g: 'auto:ip'
                     - IP address (IPv4 and IPv6 supported) e.g: '100.0.0.1'
         """
-        mode = f"current-{str(dt.now()).split('.')[0][:-6]}"
+        mode = f"current-{str(dt.now()).split('.')[0][:-6]}" # current-2021-02-01 07.3
 
         if (n := Forecaster.__find_cache(loc, mode)):
             return n
@@ -95,11 +95,11 @@ class Forecaster:
         if (e := Forecaster.__error_code_to_error(response)):
             raise e
 
-        Forecaster.__dump_cache(loc, mode, response)
+        Forecaster.__dump_cache(loc, mode, response) # Writes the response dictionary from the Forecaster to the current cache file
 
         return response
 
-    def forecast_for(self, loc, days=7):
+    def forecast_for(self, loc, days=3):
         """
         API request to weatherapi.com for future weather forecast.
 
@@ -131,6 +131,6 @@ class Forecaster:
         if (e := Forecaster.__error_code_to_error(response)):
             raise e
 
-        Forecaster.__dump_cache(loc, f"{mode}-{days}", response["forecast"]["forecastday"])
+        Forecaster.__dump_cache(loc, f"{mode}-{days}", response["forecast"]["forecastday"]) # Writes the response dictionary from the Forecaster to the current cache file
 
         return response["forecast"]["forecastday"]
