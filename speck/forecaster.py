@@ -6,6 +6,8 @@ from pathlib import Path
 
 from datetime import datetime as dt
 
+from . import errors
+
 class Forecaster:
     def __init__(self, token):
         self.token = token
@@ -35,7 +37,35 @@ class Forecaster:
         except FileNotFoundError:
             return None
 
-    def current_weather_in(self, city):
+    @staticmethod
+    def __error_code_to_error(response):
+        if "error" in response:
+            code = response["error"]["code"]
+            message = response["error"]["message"]
+
+            # This monstrosity
+            if code == 1002:
+                return errors.NoApiKey(message, response)
+            elif code == 1003:
+                return errors.QueryNotProvided(message, response)
+            elif code == 1005:
+                return errors.InvalidRequestUrl(message, response)
+            elif code == 1006:
+                return errors.InvalidLocation(message, response)
+            elif code == 2006:
+                return errors.InvalidApiKey(message, response)
+            elif code == 2007:
+                return errors.QuotaExceeded(message, response)
+            elif code == 2008:
+                return errors.ApiKeyDisabled(message, response)
+            elif code == 9999:
+                return errors.InternalError(message, response)
+            else:
+                return errors.WeatherApiError(message, response)
+
+        return None
+
+    def current_weather_in(self, loc):
         """
         Get current weather conditions in a city.
 
@@ -53,18 +83,23 @@ class Forecaster:
                     - auto:ip IP lookup e.g: 'auto:ip'
                     - IP address (IPv4 and IPv6 supported) e.g: '100.0.0.1'
         """
-        mode = f"forecast-{str(dt.now()).split('.')[0][:-4]}"
+        mode = f"current-{str(dt.now()).split('.')[0][:-6]}"
 
-        if (n := Forecaster.__find_cache(city, mode)):
+        if (n := Forecaster.__find_cache(loc, mode)):
             return n
 
-        req = f"http://api.weatherapi.com/v1/current.json?key={self.token}&q={city}"
+        req = f"http://api.weatherapi.com/v1/current.json?key={self.token}&q={loc}"
 
         response = requests.get(req).json()
-        Forecaster.__dump_cache(city, f"forecast-{mode}", response)
+
+        if (e := Forecaster.__error_code_to_error(response)):
+            raise e
+
+        Forecaster.__dump_cache(loc, mode, response)
+
         return response
 
-    def forecast_for(self, city, days=7):
+    def forecast_for(self, loc, days=7):
         """
         API request to weatherapi.com for future weather forecast.
 
@@ -84,13 +119,18 @@ class Forecaster:
 
         * **days:** Number of days to forecast for. Maximum is 10.
         """
-        mode = str(dt.now()).split()[0]
+        mode = f"forecast-{str(dt.now()).split()[0]}"
 
-        if (n := Forecaster.__find_cache(city, mode)):
+        if (n := Forecaster.__find_cache(loc, mode)):
             return n
 
-        req = f"http://api.weatherapi.com/v1/forecast.json?key={self.token}&q={city}&days={max(days, 10)}"
+        req = f"http://api.weatherapi.com/v1/forecast.json?key={self.token}&q={loc}&days={min(days, 10)}"
 
         response = requests.get(req).json()
-        Forecaster.__dump_cache(city, f"forecast-{mode}-{days}", response)
-        return response
+
+        if (e := Forecaster.__error_code_to_error(response)):
+            raise e
+
+        Forecaster.__dump_cache(loc, f"{mode}-{days}", response["forecast"]["forecastday"])
+
+        return response["forecast"]["forecastday"]
