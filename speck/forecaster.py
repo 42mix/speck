@@ -1,67 +1,95 @@
 import json
-import requests # Module that allows you to make reqs
+import pickle
+import requests
 
-import os       # Utility
-from pathlib import Path # Utility
+import os
+from pathlib import Path
 
 from datetime import datetime as dt
 
 from . import errors
 
-class Forecaster: # This is something like str or int
+class Forecaster:
+    """Custom class acting as an interface to weatherapi.com."""
     def __init__(self, token):
         self.token = token
 
     @staticmethod
-    def __find_cache(city, mode):
+    def __find_cache(city, mode): # Cache to reduce API requests
+        """
+        Look for cache for a specific type of request.
+
+        * Parameter `mode` should be of the format: `type-identifier`, where `type` is
+          the type of request (typically something like 'forecast' for forecasted data and 'current' for current data),
+          and `identifier` is a string uniquely used to identify a specific dataset, typically a timestamp rounded up.
+        """
         try:
-            with open(f"cache/{mode.split('-')[0]}/{city}-{mode}.json", "r") as f:
-                return json.load(f.read())
+            with open(f"cache/{mode.split('-')[0]}/{city}-{mode}.dat", "rb") as f: # Cache is stored as a dictionary/list
+                return pickle.load(f)                                              # in a binary file, which can be read later on.
         except:
             return None
 
     @staticmethod
     def __dump_cache(city, mode, data):
+        """
+        Write data to cache and cleanup old cache.
+
+        * Parameter `mode` should be of the format: `type-identifier`, where `type` is
+          the type of request (typically something like 'forecast' for forecasted data and 'current' for current data),
+          and `identifier` is a string uniquely used to identify a specific dataset, typically a timestamp rounded up.
+        """
         Forecaster.__cleanup_cache(city, mode) # Just to save space
 
-        Path(f"cache/{mode.split('-')[0]}").mkdir(parents=True, exist_ok=True) # creates cache folder
+        Path(f"cache/{mode.split('-')[0]}").mkdir(parents=True, exist_ok=True) # Creates cache folder
         
-        with open(f"cache/{mode.split('-')[0]}/{city}-{mode}.json", "w") as f:
-            json.dump(data, f)
+        with open(f"cache/{mode.split('-')[0]}/{city}-{mode}.dat", "wb") as f: # Uses mode's type as parent dir
+            pickle.dump(data, f)
 
     @staticmethod
     def __cleanup_cache(city, mode):
+        """
+        Cleanup old cache, if exists.
+
+        * Parameter `mode` should be of the format: `type-identifier`, where `type` is
+          the type of request (typically something like 'forecast' for forecasted data and 'current' for current data),
+          and `identifier` is a string uniquely used to identify a specific dataset, typically a timestamp rounded up.
+        """
         try:
-            for i in os.listdir(f"cache/{mode.split('-')[0]}"): # lists all the files in the current folder dir - folder listfolder
-                os.remove(f"cache/{mode.split('-')[0]}/{i}")
+            for i in os.listdir(f"cache/{mode.split('-')[0]}"): # Lists all the files in the current folder/dir
+                os.remove(f"cache/{mode.split('-')[0]}/{i}")    # Uses mode's type as parent dir
         except FileNotFoundError:
             return None
 
     @staticmethod
     def __error_code_to_error(response):
+        """
+        Convert weatherapi.com provided error code to Error Type.
+        
+        * Parameter `response` should be the raw weatherapi.com response.
+        """
         if "error" in response:
             code = response["error"]["code"]
             message = response["error"]["message"]
 
             # This monstrosity
             if code == 1002:
-                return errors.NoApiKey(message, response)
+                return errors.NoApiKey(message, code)
             elif code == 1003:
-                return errors.QueryNotProvided(message, response)
+                return errors.QueryNotProvided(message, code)
             elif code == 1005:
-                return errors.InvalidRequestUrl(message, response)
+                return errors.InvalidRequestUrl(message, code)
             elif code == 1006:
-                return errors.InvalidLocation(message, response)
+                return errors.InvalidLocation(message, code)
             elif code == 2006:
-                return errors.InvalidApiKey(message, response)
+                return errors.InvalidApiKey(message, code)
             elif code == 2007:
-                return errors.QuotaExceeded(message, response)
+                return errors.QuotaExceeded(message, code)
             elif code == 2008:
-                return errors.ApiKeyDisabled(message, response)
+                return errors.ApiKeyDisabled(message, code)
             elif code == 9999:
-                return errors.InternalError(message, response)
+                return errors.InternalError(message, code)
             else:
-                return errors.WeatherApiError(message, response)
+                return errors.WeatherApiError(message, code)
 
         return None
 
@@ -83,8 +111,8 @@ class Forecaster: # This is something like str or int
                     - auto:ip IP lookup e.g: 'auto:ip'
                     - IP address (IPv4 and IPv6 supported) e.g: '100.0.0.1'
         """
-        mode = f"current-{str(dt.now()).split('.')[0][:-6]}" # current-2021-02-01 07.3
-
+        mode = f"current-{str(dt.now())[15]}" # In this case, the mode's type is 'forecast', and
+                                              # and identifier is 'date' where date is rounded up to the 10th minute.
         if (n := Forecaster.__find_cache(loc, mode)):
             return n
 
@@ -119,8 +147,8 @@ class Forecaster: # This is something like str or int
 
         * **days:** Number of days to forecast for. Maximum is 10.
         """
-        mode = f"forecast-{str(dt.now()).split()[0]}"
-
+        mode = f"forecast-{str(dt.now()).split()[0]}-{days}" # In this case, the mode's type is 'forecast', and
+                                                             # and identifier is 'date-days' where date ignores time.
         if (n := Forecaster.__find_cache(loc, mode)):
             return n
 
@@ -131,6 +159,6 @@ class Forecaster: # This is something like str or int
         if (e := Forecaster.__error_code_to_error(response)):
             raise e
 
-        Forecaster.__dump_cache(loc, f"{mode}-{days}", response["forecast"]["forecastday"]) # Writes the response dictionary from the Forecaster to the current cache file
+        Forecaster.__dump_cache(loc, mode, response["forecast"]["forecastday"]) # Writes the response dictionary from the Forecaster to the current cache file
 
         return response["forecast"]["forecastday"]
