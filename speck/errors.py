@@ -7,10 +7,10 @@ https://www.weatherapi.com/docs/
 # of raising one of these errors depending on the response.
 # Call help(errors) or help(ErrorName) to get help for the entire module or just one error.
 
-class WeatherApiError(Exception):
+class WeatherApiError(Exception): # We use these custom error classes to convert the error code into something more understandable
     """Raised when an unknown weatherapi error is encountered."""
-    def __init__(self, message, internal_error):
-        self.internal_error = internal_error
+    def __init__(self, message, internal_code):
+        self.internal_code = internal_code
         super().__init__(message)
 
 class NoApiKey(WeatherApiError):
