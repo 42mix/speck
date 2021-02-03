@@ -8,11 +8,13 @@ from pathlib import Path
 from datetime import datetime as dt
 
 from . import errors
+from . import ace
 
 class Forecaster:
     """Custom class acting as an interface to weatherapi.com."""
     def __init__(self, token):
         self.token = token
+        self.ace = ace.Ace(file="res/cities_p.json", data_id_key="name")
 
     @staticmethod
     def __find_cache(city, mode): # Cache to reduce API requests

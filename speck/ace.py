@@ -1,17 +1,23 @@
+"""
+Autocompletion Engine for Speck (ACE) that focuses on speed.
+
+Rather than simply looking through an entire file for all values
+that may contain a phrase, Ace indexes results into memory and a
+cache file for future use. This allows significantly faster
+search times.
+"""
 import json
 import pickle
 
 import os
 import sys
 from pathlib import Path
-from datetime import datetime as dt
 
 import atexit
 
 class Ace:
     """
-    ACE - shorthand for AutoCompletion Engine. Wrapper around
-    simple data in the form of a list.
+    Wrapper around simple data in the form of a list.
 
     Ace uses indexing to store queries in memory (and a cache file for future use)
     to return a list of all elements containing the query.
@@ -23,9 +29,7 @@ class Ace:
 
             with open(file, "r", encoding="utf-8") as f: # Doesn't work on windows withouth encoding flag for some reason
                 try:
-                    st = dt.now()
                     data = json.loads(f.read()) # This is slow
-                    print(f"Data init: {dt.now() - st}")
                 except:
                     raise TypeError("Data must be in JSON format.")
         
@@ -64,7 +68,16 @@ class Ace:
             pickle.dump(self.index, f)
 
     def complete(self, phrase, truncate=32, force_truncate=None):
-        """Return a list of all elements in the data set that contains a phrase."""
+        """
+        Return a list of all elements in the data set that contains a phrase. Importance
+        is given to elements that **begin** with the phrase, and are inserted into the fron of the list.
+
+        Parameters
+        ----------
+        * phrase - search query. Elements that contain this phrase will be returned.
+        * truncate - Maximum length of results. Only `truncate` number of elements will be returned, but all results will be cached.
+        * force_truncate - Maximum values to look through. The function will return once `force_truncate` number of elements have been found.
+        """
         if phrase in self.index:
             return self.index[phrase]
 
