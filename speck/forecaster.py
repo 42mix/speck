@@ -95,6 +95,15 @@ class Forecaster:
 
         return None
 
+    @staticmethod
+    def __make_request(endpoint, parameters):
+        base_url = "http://api.weatherapi.com/v1"
+
+        if endpoint[0] != '/':
+            raise errors.InvalidRequestUrl("Endpoint must begin with a `/`")
+
+        return requests.get(f"{base_url}{endpoint}{parameters}").json()
+
     def current_weather_in(self, loc):
         """
         Get current weather conditions in a city.
@@ -118,9 +127,7 @@ class Forecaster:
         if (n := Forecaster.__find_cache(loc, mode)):
             return n
 
-        req = f"http://api.weatherapi.com/v1/current.json?key={self.token}&q={loc}"
-
-        response = requests.get(req).json()
+        response = Forecaster.__make_request("/current.json", f"?key={self.token}&q={loc}")
 
         if (e := Forecaster.__error_code_to_error(response)):
             raise e
@@ -154,9 +161,7 @@ class Forecaster:
         if (n := Forecaster.__find_cache(loc, mode)):
             return n
 
-        req = f"http://api.weatherapi.com/v1/forecast.json?key={self.token}&q={loc}&days={min(days, 10)}"
-
-        response = requests.get(req).json()
+        response = Forecaster.__make_request("/forecast.json", f"?key={self.token}&q={loc}&days={min(days, 10)}")
 
         if (e := Forecaster.__error_code_to_error(response)):
             raise e
