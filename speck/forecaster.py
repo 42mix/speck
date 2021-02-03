@@ -11,13 +11,13 @@ from . import errors
 from . import ace
 
 class Forecaster:
-    """Custom class acting as an interface to weatherapi.com."""
+    """Primary interface to `weatherapi.com`."""
     def __init__(self, token):
         self.token = token
         self.ace = ace.Ace(file="res/cities_p.json", data_id_key="name")
 
     @staticmethod
-    def __find_cache(city, mode): # Cache to reduce API requests
+    def __find_cache(loc, mode): # Cache to reduce API requests
         """
         Look for cache for a specific type of request.
 
@@ -26,29 +26,30 @@ class Forecaster:
           and `identifier` is a string uniquely used to identify a specific dataset, typically a timestamp rounded up.
         """
         try:
-            with open(f"cache/{mode.split('-')[0]}/{city}-{mode}.dat", "rb") as f: # Cache is stored as a dictionary/list
+            with open(f"cache/{mode.split('-')[0]}/{loc}-{mode}.dat", "rb") as f: # Cache is stored as a dictionary/list
                 return pickle.load(f)                                              # in a binary file, which can be read later on.
         except:
             return None
 
     @staticmethod
-    def __dump_cache(city, mode, data):
+    def __dump_cache(loc, mode, data):
         """
         Write data to cache and cleanup old cache.
 
         * Parameter `mode` should be of the format: `type-identifier`, where `type` is
           the type of request (typically something like 'forecast' for forecasted data and 'current' for current data),
           and `identifier` is a string uniquely used to identify a specific dataset, typically a timestamp rounded up.
+        * Parameter `data` is the data to be cached and must be provided.
         """
-        Forecaster.__cleanup_cache(city, mode) # Just to save space
+        Forecaster.__cleanup_cache(loc, mode) # Just to save space
 
         Path(f"cache/{mode.split('-')[0]}").mkdir(parents=True, exist_ok=True) # Creates cache folder
         
-        with open(f"cache/{mode.split('-')[0]}/{city}-{mode}.dat", "wb") as f: # Uses mode's type as parent dir
+        with open(f"cache/{mode.split('-')[0]}/{loc}-{mode}.dat", "wb") as f: # Uses mode's type as parent dir
             pickle.dump(data, f)
 
     @staticmethod
-    def __cleanup_cache(city, mode):
+    def __cleanup_cache(loc, mode):
         """
         Cleanup old cache, if exists.
 
@@ -58,7 +59,8 @@ class Forecaster:
         """
         try:
             for i in os.listdir(f"cache/{mode.split('-')[0]}"): # Lists all the files in the current folder/dir
-                os.remove(f"cache/{mode.split('-')[0]}/{i}")    # Uses mode's type as parent dir
+                if i.startswith(loc): # cache file will **always** begin with location
+                    os.remove(f"cache/{mode.split('-')[0]}/{i}")    # Uses mode's type as parent dir
         except FileNotFoundError:
             return None
 
@@ -110,7 +112,7 @@ class Forecaster:
 
         Paramters
         ---------
-        * **city:** Query parameter based on which data is sent back. It could be following:
+        * **loc:** Query parameter based on which data is sent back. It could be following:
 
                     - Latitude and Longitude (Decimal degree). e.g.:'48.8567,2.3508'
                     - city name e.g.: 'Paris'
@@ -142,7 +144,7 @@ class Forecaster:
 
         Paramters
         ---------
-        * **city:** Query parameter based on which data is sent back. It could be following:
+        * **loc:** Query parameter based on which data is sent back. It could be following:
 
                     - Latitude and Longitude (Decimal degree). e.g.:'48.8567,2.3508'
                     - city name e.g.: 'Paris'

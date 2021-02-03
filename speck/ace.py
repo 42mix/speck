@@ -27,7 +27,7 @@ class Ace:
             if not file:
                 raise ValueError("Either data or file must be provided.")
 
-            with open(file, "r", encoding="utf-8") as f: # Doesn't work on windows withouth encoding flag for some reason
+            with open(file, "r", encoding="utf-8") as f: # Doesn't work on windows without the `encoding` flag :/
                 try:
                     data = json.loads(f.read()) # This is slow
                 except:
@@ -62,7 +62,7 @@ class Ace:
 
     def cache_index(self):
         """Write index from memory to a cache file."""
-        Path(f"cache/ace").mkdir(parents=True, exist_ok=True)
+        Path(f"cache/ace").mkdir(parents=True, exist_ok=True) # Makes cache dir
 
         with open(f"cache/ace/{self.data_hash}.dat", "wb") as f:
             pickle.dump(self.index, f)
@@ -90,7 +90,7 @@ class Ace:
                 entry = str(i).lower()
 
             if entry.startswith(phrase):
-                completion.insert(0, i)
+                completion.insert(0, i) # Priority to entries starting with the phrase
             elif phrase in entry:
                 completion.append(i)
 
