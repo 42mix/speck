@@ -5,7 +5,7 @@ Powered by <a href="https://www.weatherapi.com/" title="Free Weather API">Weathe
 
 ACE
 ---
-Speck includes an AutoCompletion Engine, ACE for short. Call `help()` on `speck.ace` for more info.
+Speck includes an AutoCompletion Engine, ACE for short. Call `help()` on `speck.ace` for more info. Ace is optimized for large datasets and may not work correctly for small ones.
 
 Features to come
 ----------------
