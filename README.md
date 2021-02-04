@@ -3,10 +3,6 @@ Simple library to get current and forecatsed weather information. GUI frontend w
 
 Powered by <a href="https://www.weatherapi.com/" title="Free Weather API">WeatherAPI.com</a>
 
-ACE
----
-Speck includes an AutoCompletion Engine, ACE for short. Call `help()` on `speck.ace` for more info. Ace is optimized for large datasets and may not work correctly for small ones.
-
 Features to come
 ----------------
 * GUI frontend

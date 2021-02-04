@@ -7,8 +7,8 @@ from pathlib import Path
 
 from datetime import datetime as dt
 
-from . import errors
 from . import ace
+from . import errors
 
 class Forecaster:
     """Primary interface to `weatherapi.com`."""
@@ -124,7 +124,7 @@ class Forecaster:
                     - auto:ip IP lookup e.g: 'auto:ip'
                     - IP address (IPv4 and IPv6 supported) e.g: '100.0.0.1'
         """
-        mode = f"current-{str(dt.now())[15]}" # In this case, the mode's type is 'forecast', and
+        mode = f"current-{str(dt.now())[:15]}" # In this case, the mode's type is 'forecast', and
                                               # and identifier is 'date' where date is rounded up to the 10th minute.
         if (n := Forecaster.__find_cache(loc, mode)):
             return n
