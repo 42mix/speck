@@ -3,66 +3,22 @@ import pickle
 import requests
 
 import os
-from pathlib import Path
 
 from datetime import datetime as dt
 
-from . import ace
 from . import errors
+from .cache import Cache
 
 class Forecaster:
     """Primary interface to `weatherapi.com`."""
+    BASE = "http://api.weatherapi.com/v1"
+
     def __init__(self, token):
         self.token = token
-        self.ace = ace.Ace(file="res/cities_p.json", data_id_key="name")
-
-    @staticmethod
-    def __find_cache(loc, mode): # Cache to reduce API requests
-        """
-        Look for cache for a specific type of request.
-
-        * Parameter `mode` should be of the format: `type-identifier`, where `type` is
-          the type of request (typically something like 'forecast' for forecasted data and 'current' for current data),
-          and `identifier` is a string uniquely used to identify a specific dataset, typically a timestamp rounded up.
-        """
-        try:
-            with open(f"cache/{mode.split('-')[0]}/{loc}-{mode}.dat", "rb") as f: # Cache is stored as a dictionary/list
-                return pickle.load(f)                                              # in a binary file, which can be read later on.
-        except:
-            return None
-
-    @staticmethod
-    def __dump_cache(loc, mode, data):
-        """
-        Write data to cache and cleanup old cache.
-
-        * Parameter `mode` should be of the format: `type-identifier`, where `type` is
-          the type of request (typically something like 'forecast' for forecasted data and 'current' for current data),
-          and `identifier` is a string uniquely used to identify a specific dataset, typically a timestamp rounded up.
-        * Parameter `data` is the data to be cached and must be provided.
-        """
-        Forecaster.__cleanup_cache(loc, mode) # Just to save space
-
-        Path(f"cache/{mode.split('-')[0]}").mkdir(parents=True, exist_ok=True) # Creates cache folder
+        self.cache = Cache("cache")
         
-        with open(f"cache/{mode.split('-')[0]}/{loc}-{mode}.dat", "wb") as f: # Uses mode's type as parent dir
-            pickle.dump(data, f)
-
-    @staticmethod
-    def __cleanup_cache(loc, mode):
-        """
-        Cleanup old cache, if exists.
-
-        * Parameter `mode` should be of the format: `type-identifier`, where `type` is
-          the type of request (typically something like 'forecast' for forecasted data and 'current' for current data),
-          and `identifier` is a string uniquely used to identify a specific dataset, typically a timestamp rounded up.
-        """
-        try:
-            for i in os.listdir(f"cache/{mode.split('-')[0]}"): # Lists all the files in the current folder/dir
-                if i.startswith(loc): # cache file will **always** begin with location
-                    os.remove(f"cache/{mode.split('-')[0]}/{i}")    # Uses mode's type as parent dir
-        except FileNotFoundError:
-            return None
+        with open(f"{os.path.abspath(os.path.dirname(__file__))}/cities_p.json", "r", encoding="utf-8") as f:
+            self.cities = json.loads(f.read())
 
     @staticmethod
     def __error_code_to_error(response):
@@ -97,14 +53,13 @@ class Forecaster:
 
         return None
 
-    @staticmethod
-    def __make_request(endpoint, parameters):
-        base_url = "http://api.weatherapi.com/v1"
+    def find_city(self, loc):
+        return [
+            i for i in self.cities if loc in i["name"]
+        ]
 
-        if endpoint[0] != '/':
-            raise errors.InvalidRequestUrl("Endpoint must begin with a `/`")
-
-        return requests.get(f"{base_url}{endpoint}{parameters}").json()
+    def __make_request(self, endpoint, parameters):
+        return requests.get(f"{self.BASE}/{endpoint}{parameters}").json()
 
     def current_weather_in(self, loc):
         """
@@ -124,17 +79,18 @@ class Forecaster:
                     - auto:ip IP lookup e.g: 'auto:ip'
                     - IP address (IPv4 and IPv6 supported) e.g: '100.0.0.1'
         """
-        mode = f"current-{str(dt.now())[:15]}" # In this case, the mode's type is 'forecast', and
-                                              # and identifier is 'date' where date is rounded up to the 10th minute.
-        if (n := Forecaster.__find_cache(loc, mode)):
+        mode = f"current-{loc}-now-{str(dt.now())[:15]}"
+        
+        if (n := self.cache.read(mode)):
             return n
 
-        response = Forecaster.__make_request("/current.json", f"?key={self.token}&q={loc}")
+        response = self.__make_request("current.json", f"?key={self.token}&q={loc}")
 
         if (e := Forecaster.__error_code_to_error(response)):
             raise e
 
-        Forecaster.__dump_cache(loc, mode, response) # Writes the response dictionary from the Forecaster to the current cache file
+        self.cache.cleanup(mode.split("-now-")[0] + '-now-*')
+        self.cache.dump(mode, response) # Writes the response dictionary from the Forecaster to the current cache file
 
         return response
 
@@ -158,16 +114,17 @@ class Forecaster:
 
         * **days:** Number of days to forecast for. Maximum is 10.
         """
-        mode = f"forecast-{str(dt.now()).split()[0]}-{days}" # In this case, the mode's type is 'forecast', and
+        mode = f"forecast-{loc}-now-{str(dt.now()).split()[0]}-{days}" # In this case, the mode's type is 'forecast', and
                                                              # and identifier is 'date-days' where date ignores time.
-        if (n := Forecaster.__find_cache(loc, mode)):
+        if (n := self.cache.read(mode)):
             return n
 
-        response = Forecaster.__make_request("/forecast.json", f"?key={self.token}&q={loc}&days={min(days, 10)}")
+        response = self.__make_request("forecast.json", f"?key={self.token}&q={loc}&days={min(days, 10)}")
 
         if (e := Forecaster.__error_code_to_error(response)):
             raise e
 
-        Forecaster.__dump_cache(loc, mode, response["forecast"]["forecastday"]) # Writes the response dictionary from the Forecaster to the current cache file
+        self.cache.cleanup(mode.split("-now-")[0] + '-now-*')
+        self.cache.dump(mode, response["forecast"]["forecastday"])
 
         return response["forecast"]["forecastday"]
