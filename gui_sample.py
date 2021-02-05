@@ -1,18 +1,18 @@
 import random
 
-from speck.forecaster import Forecaster as Fs
+from speck.forecaster import Speck
 
 def main():
     with open("token.txt") as f:
         token = f.read()
 
-    fster = Fs(token=token)
+    fster = Speck(token=token)
 
-    city = random.choice(fster.find_city('to'))
-    coords = f"{city['lat']},{city['lng']}"
+    city = fster.find_city("to")[0]
+    coords = city["name"]
 
-    print(fster.current_weather_in(coords))
-    _ = fster.forecast_for(coords)
+    print(fster.current(coords))
+    _ = fster.forecast(coords)
 
 if __name__ == '__main__':
     main()
