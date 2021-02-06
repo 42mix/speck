@@ -11,9 +11,7 @@ class Cache:
         Path(path).mkdir(parents=True, exist_ok=True) # Creates cache folder
     
     def read(self, name):
-        """
-        Tries to read cache with `name`. Returns `None` if no such file is found.
-        """
+        """Tries to read cache with `name`. Returns `None` if no such file is found."""
         try:
             with open(f"{self.path}/{name}.dat", "rb") as f: # Cache is stored as a dictionary/list
                 return pickle.load(f)                        # in a binary file, which can be read later on.
@@ -21,16 +19,12 @@ class Cache:
             return None
 
     def dump(self, name, data):
-        """
-        Writes data to a cache file with `name`. `name` must be kept track of manually.
-        """
+        """Writes data to a cache file with `name`. `name` must be kept track of manually."""
         with open(f"{self.path}/{name}.dat", "wb") as f:
             pickle.dump(data, f)
 
     def cleanup(self, name):
-        """
-        Cleans up all cache files with a given `name`. Supports wildcard (*) deletion.
-        """
+        """Cleans up all cache files with a given `name`. Supports wildcard (*) deletion."""
         els = name.split('*')
 
         try:

@@ -4,6 +4,7 @@ from datetime import datetime as dt
 from .raw import *
 
 class RealTimePoint:
+    """Represents weather data at a particular time in some location."""
     def __init__(
         self, location,
         last_updated,
@@ -41,8 +42,10 @@ class RealTimePoint:
 
     @classmethod
     def from_raw(cls, location, data):
+        """Return `Location` object from json converted `weatherapi` response."""
         return cls(location, **data)
 
     @classmethod
     def from_json(cls, location, data):
+        """Return `Location` object from raw `weatherapi` response."""
         return cls(location, **json.loads(data))
