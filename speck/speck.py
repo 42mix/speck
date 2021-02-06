@@ -8,6 +8,7 @@ from datetime import datetime as dt
 
 from . import errors
 from . import cache
+from . import types
 
 class Speck:
     """Primary interface to `weatherapi.com`."""
@@ -87,13 +88,15 @@ class Speck:
 
         response = self.__make_request('current.json', f'?key={self.token}&q={loc}')
 
+        nloc = types.location.Location.from_raw(response["location"])
+
         if (e := Speck.__error_code_to_error(response)):
             raise e
 
         self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
         self.cache.dump(mode, response) # Writes the response dictionary from the Forecaster to the current cache file
 
-        return response
+        return response, nloc
 
     def forecast(self, loc, days=3):
         """

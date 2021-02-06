@@ -11,6 +11,5 @@ __license__ = "MIT"
 
 from . import errors
 from . import cache
-from . import location
-from . import data_point
 from . import speck
+from . import types

@@ -1,6 +1,6 @@
 import random
 
-from speck.forecaster import Speck
+from speck.speck import Speck
 
 def main():
     with open("token.txt") as f:
