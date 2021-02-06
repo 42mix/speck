@@ -84,11 +84,15 @@ class Speck:
         mode = f"current-{loc}-now-{str(dt.now())[:15]}"
         
         if (n := self.cache.read(mode)):
-            return n
+            nloc = types.location.Location.from_raw(n["location"])
+            res = types.data_point.RealTimePoint.from_raw(nloc, n["current"])
+
+            return res
 
         response = self.__make_request('current.json', f'?key={self.token}&q={loc}')
 
         nloc = types.location.Location.from_raw(response["location"])
+        res = types.data_point.RealTimePoint.from_raw(nloc, response["current"])
 
         if (e := Speck.__error_code_to_error(response)):
             raise e
@@ -96,7 +100,7 @@ class Speck:
         self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
         self.cache.dump(mode, response) # Writes the response dictionary from the Forecaster to the current cache file
 
-        return response, nloc
+        return res
 
     def forecast(self, loc, days=3):
         """

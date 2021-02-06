@@ -11,8 +11,9 @@ def main():
     city = fster.find_city("to")[0]
     coords = city["name"]
 
-    print(fster.current(coords))
-    _ = fster.forecast(coords)
+    cur = fster.current(coords)
+
+    print(cur.last_updated)
 
 if __name__ == '__main__':
     main()

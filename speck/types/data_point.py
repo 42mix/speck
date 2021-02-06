@@ -1,7 +1,7 @@
-from .raw import *
-
 import json
 from datetime import datetime as dt
+
+from .raw import *
 
 class RealTimePoint:
     def __init__(
@@ -14,7 +14,9 @@ class RealTimePoint:
         cloud, is_day,
         uv, *args, **kwargs
         ):
-        self.last_updated = dt.strptime(last_updated, "%Y-%m-%d %H-%M-%S-%f") # localtime
+        self.location = location
+
+        self.last_updated = dt.strptime(last_updated, "%Y-%m-%d %H:%M") # localtime
 
         self.temp_c = Cel(temp_c)
         self.feelslike_c = Cel(feelslike_c)
