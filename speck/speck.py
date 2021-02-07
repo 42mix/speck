@@ -84,8 +84,8 @@ class Speck:
         mode = f"current-{loc}-now-{str(dt.now())[:15]}"
         
         if (n := self.cache.read(mode)):
-            nloc = types.location.Location.from_raw(n["location"])
-            res = types.data_point.RealTimePoint.from_json(nloc, n["current"])
+            nloc = types.Location.from_raw(n["location"])
+            res = types.RealTimePoint.from_raw(nloc, n["current"])
 
             return res
 
