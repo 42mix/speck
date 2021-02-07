@@ -1,6 +1,9 @@
 import random
 
+import json
+
 from speck.speck import Speck
+from speck import types
 
 def main():
     with open("token.txt") as f:
@@ -13,7 +16,10 @@ def main():
 
     cur = fster.current(coords)
 
-    print(cur.last_updated)
+    with open("sample_pre.json", "w") as f:
+        json.dump(fster.forecast("London"), f, indent=4)
+
+    print(cur.time)
 
 if __name__ == '__main__':
     main()

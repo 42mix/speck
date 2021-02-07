@@ -84,15 +84,13 @@ class Speck:
         mode = f"current-{loc}-now-{str(dt.now())[:15]}"
         
         if (n := self.cache.read(mode)):
-            nloc = types.Location.from_raw(n["location"])
-            res = types.RealTimePoint.from_raw(nloc, n["current"])
+            res = types.HourlyPoint.from_raw(n["location"], n["current"])
 
             return res
 
         response = self.__make_request('current.json', f'?key={self.token}&q={loc}')
 
-        nloc = types.location.Location.from_raw(response["location"])
-        res = types.data_point.RealTimePoint.from_raw(nloc, response["current"])
+        res = types.HourlyPoint.from_raw(response["location"], response["current"])
 
         if (e := Speck.__error_code_to_error(response)):
             raise e

@@ -36,24 +36,35 @@ class Location(BasePoint):
         """Return `Location` object from raw `weatherapi` response."""
         return cls(**json.loads(data))
 
-class RealTimePoint(BasePoint):
+class HourlyPoint(BasePoint):
     """Represents weather data at a particular time in some location."""
     def __init__(
         self, location,
-        last_updated,
         temp_c, feelslike_c,
         condition,
         wind_kph, wind_degree, wind_dir, gust_kph,
         pressure_mb, precip_mm, humidity,
-        cloud, is_day,
-        uv, *args, **kwargs
+        cloud, is_day, uv,
+        last_updated, time=None,
+        windchill_c=None, heatindex_c=None, dewpoint_c=None,
+        will_it_rain=None, will_it_snow=None,
+        chance_of_rain=None, chance_of_snow=None,
+        vis_km=None,
+        *args, **kwargs
         ):
-        self.location = location
+        if isinstance(location, Location):
+            self.location = location
+        else:
+            self.location = Location.from_raw(location)
 
-        self.last_updated = dt.strptime(last_updated, "%Y-%m-%d %H:%M") # localtime
+        self.time = dt.strptime(last_updated if not time else time, "%Y-%m-%d %H:%M") # localtime
 
         self.temp_c = Cel(temp_c)
         self.feelslike_c = Cel(feelslike_c)
+
+        self.windchill_c = Cel(windchill_c)
+        self.heatindex_c = Cel(heatindex_c)
+        self.dewpoint_c = Cel(dewpoint_c)
 
         self.condition = condition
 
@@ -66,9 +77,79 @@ class RealTimePoint(BasePoint):
         self.pressure_mb = Mb(pressure_mb)
         self.precip_mm = Mm(precip_mm)
 
+        self.will_it_rain = will_it_rain
+        self.will_it_snow = will_it_snow
+        self.chance_of_rain = chance_of_rain
+        self.chance_of_snow = chance_of_snow
+
         self.humidity = humidity
         self.cloud = cloud
 
         self.is_day = True if is_day else False
 
         self.uv = uv
+        self.vis_km = Km(vis_km)
+
+class DayPoint(BasePoint):
+    def __init__(
+        self, location,
+        maxtemp_c, mintemp_c, avgtemp_c, maxwind_kph, totalprecip_mm, avgvis_km, avghumidity, condition, uv,
+        *args, **kwargs
+        ):
+        if isinstance(location, Location):
+            self.location = location
+        else:
+            self.location = Location.from_raw(location)
+
+        self.maxtemp_c = Cel(maxtemp_c)
+        self.mintemp_c = Cel(mintemp_c)
+        self.avgtemp_c = Cel(avgtemp_c)
+
+        self.condition = condition
+        
+        self.maxwind_kph = Kph(maxwind_kph)
+        
+        self.totalprecip_mm = Mm(totalprecip_mm)
+        self.avgvis_km = Km(avgvis_km)
+        self.avghumidity = avghumidity
+
+        self.uv = uv
+
+class AstroPoint(BasePoint):
+    def __init__(self, location, sunrise, sunset, moonrise, moonset, moon_phase):
+        if isinstance(location, Location):
+            self.location = location
+        else:
+            self.location = Location.from_raw(location)
+
+        self.sunrise = sunrise
+        self.sunset = sunset
+
+        self.moonrise = moonrise
+        self.moonset = moonset
+
+        self.moon_phase = moon_phase
+
+class DailyPoint(BasePoint):
+    def __init__(self, location, date, day, astro, hour):
+        if isinstance(location, Location):
+            self.location = location
+        else:
+            self.location = Location.from_raw(location)
+        
+        self.date = dt.strptime(date, "%Y-%m-%d %H:%M") # localtime
+
+        if isinstance(day, DayPoint):
+            self.day = day
+        else:
+            self.day = DayPoint.from_raw(location, day)
+
+        self.astro = astro
+
+        self.hour = []
+
+        for i in hour:
+            if isinstance(i, HourlyPoint):
+                self.hour.append(i)
+            else:
+                self.hour.append(HourlyPoint.from_raw(location, i))

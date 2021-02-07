@@ -11,6 +11,13 @@ class Base:
     def __ne__(self, other):
         return not self.__eq__(other)
 
+class Km(Base):
+    def __init__(self, val):
+        super().__init__(val)
+
+    def mi(self):
+        return self.val * 0.6213712
+
 class Kph(Base):
     def __init__(self, val):
         super().__init__(val)
