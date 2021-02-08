@@ -15,11 +15,7 @@ def main():
     coords = city["name"]
 
     cur = fster.current(coords)
-
-    with open("sample_pre.json", "w") as f:
-        json.dump(fster.forecast("London"), f, indent=4)
-
-    print(cur.time)
+    pre = fster.forecast(coords)
 
 if __name__ == '__main__':
     main()

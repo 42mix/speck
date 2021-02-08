@@ -83,7 +83,8 @@ class Speck:
         """
         mode = f"current-{loc}-now-{str(dt.now())[:15]}"
         
-        if (n := self.cache.read(mode)):
+        n = self.cache.read(mode)
+        if n:
             res = types.HourlyPoint.from_raw(n["location"], n["current"])
 
             return res
@@ -92,7 +93,8 @@ class Speck:
 
         res = types.HourlyPoint.from_raw(response["location"], response["current"])
 
-        if (e := Speck.__error_code_to_error(response)):
+        e = Speck.__error_code_to_error(response)
+        if e:
             raise e
 
         self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
@@ -122,15 +124,30 @@ class Speck:
         """
         mode = f"forecast-{loc}-now-{str(dt.now()).split()[0]}-{days}"
 
-        if (n := self.cache.read(mode)):
-            return n
+        n = self.cache.read(mode)
+        if n:
+            res = []
+
+            for i in n["forecast"]["forecastday"]:
+                res.append(types.DailyPoint(n["location"], i["day"], i["astro"], i["hour"]))
+
+            return res
 
         response = self.__make_request('forecast.json', f'?key={self.token}&q={loc}&days={min(days, 10)}')
 
-        if (e := Speck.__error_code_to_error(response)):
+        with open("sample_pre.json", "w") as f:
+            json.dump(response, f, indent=4)
+
+        res = []
+
+        for i in response["forecast"]["forecastday"]:
+            res.append(types.DailyPoint(response["location"], i["day"], i["astro"], i["hour"]))
+
+        e = Speck.__error_code_to_error(response)
+        if e:
             raise e
 
         self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
         self.cache.dump(mode, response)
 
-        return response
+        return res

@@ -1,5 +1,5 @@
 # SPECK
-Simple library to get current and forecatsed weather information. GUI frontend will be added in the future. Currently only works with Python 3.8+.
+Simple library to get current and forecatsed weather information. GUI frontend will be added in the future. Needs Python 3.6+
 
 Powered by <a href="https://www.weatherapi.com/" title="Free Weather API">WeatherAPI.com</a>
 

@@ -45,7 +45,7 @@ class HourlyPoint(BasePoint):
         wind_kph, wind_degree, wind_dir, gust_kph,
         pressure_mb, precip_mm, humidity,
         cloud, is_day, uv,
-        last_updated, time=None,
+        last_updated=None, time=None,
         windchill_c=None, heatindex_c=None, dewpoint_c=None,
         will_it_rain=None, will_it_snow=None,
         chance_of_rain=None, chance_of_snow=None,
@@ -131,13 +131,13 @@ class AstroPoint(BasePoint):
         self.moon_phase = moon_phase
 
 class DailyPoint(BasePoint):
-    def __init__(self, location, date, day, astro, hour):
+    def __init__(self, location, day, astro, hour):
         if isinstance(location, Location):
             self.location = location
         else:
             self.location = Location.from_raw(location)
         
-        self.date = dt.strptime(date, "%Y-%m-%d %H:%M") # localtime
+        # self.date = dt.strptime(date, "%Y-%m-%d %H:%M") # localtime
 
         if isinstance(day, DayPoint):
             self.day = day
