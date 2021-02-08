@@ -11,14 +11,16 @@ from . import cache
 from . import types
 
 class Speck:
-    """Primary interface to `weatherapi.com`."""
+    """A Speck object represents the interface to `weatherapi.com`."""
+    
     BASE = "http://api.weatherapi.com/v1"
 
     def __init__(self, token):
         self.token = token
         self.cache = cache.Cache('cache')
         
-        with open(f'{os.path.abspath(os.path.dirname(__file__))}/cities_p.json', 'r', encoding='utf-8') as f:
+        # `os.path.abspath(os.path.dirname(__file__))` is the absolute location of the cities list file
+        with open(f'{os.path.abspath(os.path.dirname(__file__))}/cities_p.json', 'r', encoding='utf-8') as f: # This looks for the cities list file
             self.cities = json.loads(f.read())
 
     @staticmethod
@@ -32,6 +34,7 @@ class Speck:
             code = response['error']['code']
             message = response['error']['message']
 
+            # These are hardcoded
             if code == 1002:
                 return errors.NoApiKey(message, code)
             elif code == 1003:
@@ -55,12 +58,12 @@ class Speck:
 
     def __make_request(self, endpoint, parameters):
         """Private method to make a request to `weatherapi.com`."""
-        return requests.get(f"{self.BASE}/{endpoint}{parameters}").json()
+        return requests.get(f"{self.BASE}/{endpoint}{parameters}").json() # Does the acutal request
 
     def find_city(self, loc):
         """Returns an array of city names and coordinates containing a search pattern."""
         return [
-            i for i in self.cities if loc in i['name']
+            i for i in self.cities if loc in i['name'] # Generates a list of city names containing the string `loc`
         ]
 
     def current(self, loc):
@@ -85,22 +88,25 @@ class Speck:
         
         n = self.cache.read(mode)
         if n:
+            # If cache exists (not None), it will be read and an `HourlyPoint` object will be returned
             res = types.HourlyPoint.from_raw(n["location"], n["current"])
 
             return res
 
         response = self.__make_request('current.json', f'?key={self.token}&q={loc}')
 
-        res = types.HourlyPoint.from_raw(response["location"], response["current"])
+        res = types.HourlyPoint.from_raw(response["location"], response["current"]) # Creates the `HourlyPoint` object
 
         e = Speck.__error_code_to_error(response)
         if e:
-            raise e
+            raise e # We're not going to handle the error here, so anyone using the function can do it themselves
 
-        self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
-        self.cache.dump(mode, response)
+        self.cache.cleanup(mode.split('-now-')[0] + '-now-*') # Discard any old cache
+        self.cache.dump(mode, response) # Writes cache
 
         return res
+
+        ## The same pattern is followed for all other API methods implemented.
 
     def forecast(self, loc, days=3):
         """
@@ -127,7 +133,7 @@ class Speck:
 
         res = []
 
-        for i in response["forecast"]["forecastday"]:
+        for i in response["forecast"]["forecastday"]: # `forecast->forecastday` is a list of all daily forecasts
             res.append(types.DailyPoint(response["location"], i["day"], i["astro"], i["hour"]))
 
         e = Speck.__error_code_to_error(response)
@@ -167,4 +173,3 @@ class Speck:
         self.cache.dump(mode, response)
 
         return res
-        

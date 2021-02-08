@@ -8,14 +8,16 @@ class BasePoint:
     @classmethod
     def from_raw(cls, location, data):
         """Return subclass object from json converted `weatherapi` response."""
-        return cls(location, **data)
+        return cls(location, **data) # Unpacking uses the dict's keys are keyword arguments
 
     @classmethod
     def from_json(cls, location, data):
         """Return subclass object from raw `weatherapi` response."""
         return cls(location, **json.loads(data))
 
-class Location(BasePoint):
+## These subclasses are as simple as just storing data
+
+class Location(BasePoint): # Inheritance only to implement `from_raw` and `from_json` automatically for all subclasses
     """Represents location data such as coordinates, time zone, region, at a particular time."""
     def __init__(self, lat, lon, name, region=None, country=None, tz_id=None, localtime=None, *args, **kwargs):
         self.lat = lat
@@ -91,6 +93,7 @@ class HourlyPoint(BasePoint):
         self.vis_km = Km(vis_km)
 
 class DayPoint(BasePoint):
+    """The total conditions per day."""
     def __init__(
         self, location,
         maxtemp_c, mintemp_c, avgtemp_c, maxwind_kph, totalprecip_mm, avgvis_km, avghumidity, condition, uv,
@@ -116,6 +119,7 @@ class DayPoint(BasePoint):
         self.uv = uv
 
 class AstroPoint(BasePoint):
+    """Astronomy information."""
     def __init__(self, location, sunrise, sunset, moonrise, moonset, moon_phase, *args, **kwargs):
         if isinstance(location, Location):
             self.location = location
@@ -131,6 +135,7 @@ class AstroPoint(BasePoint):
         self.moon_phase = moon_phase
 
 class DailyPoint(BasePoint):
+    """All information per day, inlcuding hourly info."""
     def __init__(self, location, day, astro, hour):
         if isinstance(location, Location):
             self.location = location

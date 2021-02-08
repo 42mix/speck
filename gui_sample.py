@@ -9,7 +9,7 @@ def main():
     with open("token.txt") as f:
         token = f.read()
 
-    fster = Speck(token=token)
+    fster = Speck(token=token) # Create a speck object
 
     city = fster.find_city("to")[0]
     coords = city["name"]
