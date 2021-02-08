@@ -16,6 +16,7 @@ def main():
 
     cur = fster.current(coords)
     pre = fster.forecast(coords)
+    ast = fster.astro(coords)
 
 if __name__ == '__main__':
     main()

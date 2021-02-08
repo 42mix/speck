@@ -53,19 +53,19 @@ class Speck:
 
         return None
 
+    def __make_request(self, endpoint, parameters):
+        """Private method to make a request to `weatherapi.com`."""
+        return requests.get(f"{self.BASE}/{endpoint}{parameters}").json()
+
     def find_city(self, loc):
         """Returns an array of city names and coordinates containing a search pattern."""
         return [
             i for i in self.cities if loc in i['name']
         ]
 
-    def __make_request(self, endpoint, parameters):
-        """Private method to make a request to `weatherapi.com`."""
-        return requests.get(f"{self.BASE}/{endpoint}{parameters}").json()
-
     def current(self, loc):
         """
-        Get current weather conditions in a city.
+        Get current weather conditions in a location.
 
         Paramters
         ---------
@@ -98,27 +98,17 @@ class Speck:
             raise e
 
         self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
-        self.cache.dump(mode, response) # Writes the response dictionary from the Forecaster to the current cache file
+        self.cache.dump(mode, response)
 
         return res
 
     def forecast(self, loc, days=3):
         """
-        API request to weatherapi.com for future weather forecast.
+        Get weather forecast for a location.
 
         Paramters
         ---------
-        * **loc:** Query parameter based on which data is sent back. It could be following:
-
-                    - Latitude and Longitude (Decimal degree). e.g.:'48.8567,2.3508'
-                    - city name e.g.: 'Paris'
-                    - US zip e.g.: '10001'
-                    - UK postcode e.g: 'SW1'
-                    - Canada postal code e.g: 'G2J'
-                    - metar:<metar code> e.g: 'metar:EGLL'
-                    - iata:<3 digit airport code> e.g: 'iata:DXB'
-                    - auto:ip IP lookup e.g: 'auto:ip'
-                    - IP address (IPv4 and IPv6 supported) e.g: '100.0.0.1'
+        * **loc:** Query parameter based on which data is sent back. See docs on method `current` for more info.
 
         * **days:** Number of days to forecast for. Maximum is 10.
         """
@@ -135,9 +125,6 @@ class Speck:
 
         response = self.__make_request('forecast.json', f'?key={self.token}&q={loc}&days={min(days, 10)}')
 
-        with open("sample_pre.json", "w") as f:
-            json.dump(response, f, indent=4)
-
         res = []
 
         for i in response["forecast"]["forecastday"]:
@@ -151,3 +138,33 @@ class Speck:
         self.cache.dump(mode, response)
 
         return res
+
+    def astro(self, loc):
+        """
+        Get current astronomy information in a location.
+
+        Paramters
+        ---------
+        * **loc:** Query parameter based on which data is sent back. See docs on method `current` for more info.
+        """
+        mode = f"astro-{loc}-now-{str(dt.now()).split()[0]}"
+
+        n = self.cache.read(mode)
+        if n:
+            res = types.AstroPoint.from_raw(n["location"], n["astronomy"]["astro"])
+
+            return res
+
+        response = self.__make_request('astronomy.json', f'?key={self.token}&q={loc}')
+
+        res = types.AstroPoint.from_raw(response["location"], response["astronomy"]["astro"])
+
+        e = Speck.__error_code_to_error(response)
+        if e:
+            raise e
+
+        self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
+        self.cache.dump(mode, response)
+
+        return res
+        

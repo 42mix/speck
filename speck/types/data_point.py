@@ -116,7 +116,7 @@ class DayPoint(BasePoint):
         self.uv = uv
 
 class AstroPoint(BasePoint):
-    def __init__(self, location, sunrise, sunset, moonrise, moonset, moon_phase):
+    def __init__(self, location, sunrise, sunset, moonrise, moonset, moon_phase, *args, **kwargs):
         if isinstance(location, Location):
             self.location = location
         else:
