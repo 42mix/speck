@@ -1,23 +1,22 @@
-"""
-Example usage file for SPECK
-"""
-from speck.forecaster import Forecaster as Fs
+import random
 
-with open("token.txt", "r") as f: # Your token is your "password" to be able to use the weatherapi.com API
-    token = f.read()              # In this case, it is stored in a file locally for security reasons
+import json
 
-fster = Fs(token) # Create a "Forecaster" object.
+from speck.speck import Speck
+from speck import types
 
-ln1 = fster.current_weather_in("London") # Returns a dict of the current conditions in the city - Dict
-ln2 = fster.forecast_for("London") # Forecasts weather for city - list of dicts
+def main():
+    with open("token.txt") as f:
+        token = f.read()
 
-print(ln2[0]["hour"][13]["temp_c"])
+    fster = Speck(token=token) # Create a speck object
 
-print(ln2[0]["day"]["maxtemp_c"])
+    city = fster.find_city("to")[0]
+    coords = city["name"]
 
-sum1 = 0
+    cur = fster.current(coords)
+    pre = fster.forecast(coords)
+    ast = fster.astro(coords)
 
-for i in ln2[0]["hour"]:
-    sum1 += i["temp_c"]
-
-print("Avg:", sum1 / 24)
+if __name__ == '__main__':
+    main()
