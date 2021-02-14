@@ -9,7 +9,7 @@ root.geometry('323x576')
 root.resizable(width=False, height="false")
 
 #define bg img
-bg= ImageTk.PhotoImage(file='C:/Users/nevin/OneDrive/Pictures/beach.png')
+bg= ImageTk.PhotoImage(file='./res/beach.png')
 
 #define canvas
 my_canvas= Canvas(root, width=323, height=576,bd=0,highlightthickness=0)
@@ -46,12 +46,12 @@ pw_window= my_canvas.create_window(34,370, anchor='nw', window=pw_entry)
 
 #create welcome screen
 def welcome():
+
     if un_entry.get()=="username" or pw_entry.get()=='password' or un_entry.get()=="" or pw_entry.get()=='':
         response=messagebox.showwarning("this is my popup","ENTER USERNAME AND PASSWORD")
     elif un_entry.get()!="11C" or pw_entry.get()!='11c2021':
         response=messagebox.showwarning("this is my popup","ENTER CORRECT USERNAME AND PASSWORD")
     
-
     else:
         un_entry.destroy()
         pw_entry.destroy()
@@ -61,7 +61,8 @@ def welcome():
         #add a welcome message
         my_canvas.create_text(160,450,text="WELCOME", font=("Helvetica",40),fill="white")
 
-
 #def btn
-login_btn= Button(root, text="LOGIN",font=("Helvetica",20), width=15,fg="dark blue", command=welcome)
+login_btn= Button(root, text="LOGIN", font=("Helvetica",20), width=15, fg="dark blue", command=welcome)
 login_btn_window= my_canvas.create_window(36,470, anchor='nw', window=login_btn)
+
+root.mainloop()

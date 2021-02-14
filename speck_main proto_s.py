@@ -45,7 +45,8 @@ un_window= my_canvas.create_window(34,290, anchor='nw', window=un_entry)
 pw_window= my_canvas.create_window(34,370, anchor='nw', window=pw_entry)
 
 def new_window():
-    _list = root.winfo_children()
+    _list = root.winfo_children()
+
 
     for item in _list :
         if item.winfo_children() :

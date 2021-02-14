@@ -17,9 +17,11 @@ pizza.set("pepperoni") #default value/option
 for text, topping in TOPPINGS:
     Radiobutton(root, text=text, variable=pizza, value=topping).pack(anchor=W)#west
 
+myLabel=Label(root,text="")
+myLabel.pack()
+
 def clicked(value):
-    myLabel=Label(root,text=value)
-    myLabel.pack()
+    myLabel.config(text=value)
 
 myButton=Button(root,text="click me!", command=lambda: clicked(pizza.get()))
 myButton.pack()

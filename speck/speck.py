@@ -42,6 +42,8 @@ class Speck:
             elif code == 1005:
                 return errors.InvalidRequestUrl(message, code)
             elif code == 1006:
+                return errors.InvalidRequestUrl(message, code)
+            elif code == 1006:
                 return errors.InvalidLocation(message, code)
             elif code == 2006:
                 return errors.InvalidApiKey(message, code)
@@ -63,7 +65,7 @@ class Speck:
     def find_city(self, loc):
         """Returns an array of city names and coordinates containing a search pattern."""
         return [
-            i for i in self.cities if loc in i['name'] # Generates a list of city names containing the string `loc`
+            i for i in self.cities if loc.lower() in i['name'].lower() # Generates a list of city names containing the string `loc`
         ]
 
     def current(self, loc):
@@ -95,11 +97,14 @@ class Speck:
 
         response = self.__make_request('current.json', f'?key={self.token}&q={loc}')
 
-        res = types.HourlyPoint.from_raw(response["location"], response["current"]) # Creates the `HourlyPoint` object
+        with open("temp.json", "w") as f:
+            json.dump(response, f, indent=4)
 
         e = Speck.__error_code_to_error(response)
         if e:
             raise e # We're not going to handle the error here, so anyone using the function can do it themselves
+
+        res = types.HourlyPoint.from_raw(response["location"], response["current"]) # Creates the `HourlyPoint` object
 
         self.cache.cleanup(mode.split('-now-')[0] + '-now-*') # Discard any old cache
         self.cache.dump(mode, response) # Writes cache
@@ -131,14 +136,14 @@ class Speck:
 
         response = self.__make_request('forecast.json', f'?key={self.token}&q={loc}&days={min(days, 10)}')
 
+        e = Speck.__error_code_to_error(response)
+        if e:
+            raise e
+
         res = []
 
         for i in response["forecast"]["forecastday"]: # `forecast->forecastday` is a list of all daily forecasts
             res.append(types.DailyPoint(response["location"], i["day"], i["astro"], i["hour"]))
-
-        e = Speck.__error_code_to_error(response)
-        if e:
-            raise e
 
         self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
         self.cache.dump(mode, response)
