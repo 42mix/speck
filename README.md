@@ -10,3 +10,12 @@ Features to come
 City Data
 ---------
 City data is from [cities.json](https://github.com/lutangar/cities.json), and has been edited to remove irrelevant data.
+
+Requirements
+------------
+Install requirements by running:
+```
+python -m pip install -r requirements.txt
+```
+
+Additionally, [tkinter](https://wiki.python.org/moin/TkInter) is required.
