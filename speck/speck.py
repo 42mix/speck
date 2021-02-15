@@ -97,9 +97,6 @@ class Speck:
 
         response = self.__make_request('current.json', f'?key={self.token}&q={loc}')
 
-        with open("temp.json", "w") as f:
-            json.dump(response, f, indent=4)
-
         e = Speck.__error_code_to_error(response)
         if e:
             raise e # We're not going to handle the error here, so anyone using the function can do it themselves
