@@ -1,3 +1,5 @@
 # For SCC
 *.csv
 *.json
+pretests/
+tests/

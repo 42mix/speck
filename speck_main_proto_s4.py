@@ -10,7 +10,9 @@ from tkinter import messagebox
 
 from PIL import ImageTk, Image
 
-print(os.environ)
+from datetime import datetime as dt
+
+# print(os.environ)
 
 class SpeckFrontend:
     def __init__(self):
@@ -115,7 +117,7 @@ class SpeckFrontend:
         self.main_canvas_3.create_image(0, 0, image=self.bg, anchor="nw")
 
         self.current_search_button = Button(self.root, text="Current",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.current_search(actual_loc))
-        self.forecast_search_button = Button(self.root, text="Forecast",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: print("1"))
+        self.forecast_search_button = Button(self.root, text="Forecast",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.forecast_search(actual_loc))
         self.astronomy_search_button = Button(self.root, text="Astronomy",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: print("2"))
         self.caclulator_init_button = Button(self.root, text="Calculator",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.calculator_search())
 
@@ -132,14 +134,18 @@ class SpeckFrontend:
         except InvalidRequestUrl:
             rloc = self.speck.find_city(loc)[0]
             cur_data = self.speck.current(f"{rloc['lat']},{rloc['lon']}")
+
+        font = int(min((30 - len(cur_data.location.name)), 24))
+
+        print(30 - len(cur_data.location.name))
         
         top = Toplevel()
-        top.title("This is a new window")
+        top.title(f"Current weather in {cur_data.location.name}")
         top.geometry('323x576')
         top.resizable(width=False, height="false")
 
-        lbl = Label(top, text=cur_data.temp_c(), font=("Helvetica", 24))
-        lbl2 = Label(top, text=f"{cur_data.location.name}, {cur_data.location.country}", font=("Helvetica",24))
+        lbl = Label(top, text=f"{cur_data.temp_c()}°C", font=("Helvetica", 24))
+        lbl2 = Label(top, text=f"{cur_data.location.name},\n{cur_data.location.country}", font=("Helvetica", font))
 
         lbl.pack()
         lbl2.pack()
@@ -151,21 +157,53 @@ class SpeckFrontend:
 
         def clicked(val):
             if val == 'C':
-                lbl.config(text=cur_data.temp_c())
+                lbl.config(text=f"{cur_data.temp_c()}°C")
             else:
-                lbl.config(text=cur_data.temp_c.fahrenheit())
+                lbl.config(text=f"{cur_data.temp_c.fahrenheit()}°F")
 
-        checkbtn=Button(top,text="update", font=("Helvetica",20), width=15,fg="dark blue", command=lambda: clicked(temp_unit.get()))
+        checkbtn=Button(top,text="update", font=("Helvetica",20), width=15, fg="dark blue", command=lambda: clicked(temp_unit.get()))
         checkbtn.pack()
 
-        close_btn_1 = Button(top, text="Close",font=("Helvetica",20), width=15,fg="dark blue", command=top.destroy).pack()
+        close_btn_1 = Button(top, text="Close",font=("Helvetica",20), width=15, fg="dark blue", command=top.destroy).pack()
+
+    def forecast_search(self, loc):
+        try:
+            fore_data = self.speck.forecast(loc)
+        except InvalidRequestUrl:
+            rloc = self.speck.find_city(loc)[0]
+            fore_data = self.speck.forecast(f"{rloc['lat']},{rloc['lon']}")
+
+        font = int(min((30 - len(fore_data[0].location.name)), 24))
+
+        top = Toplevel()
+        top.title(f"Forecast weather in {fore_data[0].location.name}")
+        top.geometry('323x576')
+        top.resizable(width=False, height="false")
+
+        lbl = Label(top, text=f"\n{fore_data[0].location.name},\n{fore_data[0].location.country}", font=("Helvetica", font))
+        lbl.pack()
+
+        for n, i in enumerate(fore_data):
+            cdt = dt.now()
+            ndt = dt(cdt.year, cdt.month, cdt.day + n + 1)
+
+            txt = f"\n\nForecasted average temperature on\n{ndt.day}-{ndt.month}-{ndt.year}: {i.day.avgtemp_c()}°C\n\n"
+
+            lbl_tmp = Label(top, text=txt, font=("Helvetica", 14))
+            lbl_tmp.pack()
+
+            #        [a, v, c, efkef,]
+            #
+            #        for var1, var2 in enumerate(list1):
+            #            a -> v -> c -> efkef
+            #            0 -> 1 -> 2 -> 3
 
     def calculator_search(self):
         calculator.main()
 
     ## ==========================================
 
-    def mainloop(self):
+    def run(self):
         self.root = Tk()
         self.root.title('Speck Frontend')
         self.root.geometry('323x576')
@@ -200,15 +238,15 @@ class SpeckFrontend:
         self.welcome_password_entry.bind("<Button-1>", entry_clear)
 
         # add entry boxes to canvas
-        un_window= self.main_canvas.create_window(34,290, anchor='nw', window=self.welcome_username_entry)
-        pw_window= self.main_canvas.create_window(34,370, anchor='nw', window=self.welcome_password_entry)
+        un_window = self.main_canvas.create_window(34,290, anchor='nw', window=self.welcome_username_entry)
+        pw_window = self.main_canvas.create_window(34,370, anchor='nw', window=self.welcome_password_entry)
 
         self.welcome_login_button = Button(self.root, text="LOGIN", font=("Helvetica", 20), width=15,fg="dark blue", command=self.welcome)
         welcome_login_button_win = self.main_canvas.create_window(36,470, anchor='nw', window=self.welcome_login_button)
 
         self.root.mainloop()
 
-if __name__ == '__main__':
-    app = SpeckFrontend()
 
-    app.mainloop()
+if __name__ == '__main__':
+    app = SpeckFrontend() # Create an instance
+    app.run()
