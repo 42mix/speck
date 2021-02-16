@@ -60,7 +60,10 @@ class Speck:
 
     def __make_request(self, endpoint, parameters):
         """Private method to make a request to `weatherapi.com`."""
-        return requests.get(f"{self.BASE}/{endpoint}{parameters}").json() # Does the acutal request
+        try:
+            return requests.get(f"{self.BASE}/{endpoint}{parameters}").json() # Does the acutal request
+        except:
+            raise errors.InternalError("Unable to fetch data at this time.", 9999)
 
     def find_city(self, loc):
         """Returns an array of city names and coordinates containing a search pattern."""

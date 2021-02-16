@@ -11,6 +11,7 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 
 from datetime import datetime as dt
+from datetime import timedelta as td
 
 # print(os.environ)
 
@@ -118,7 +119,7 @@ class SpeckFrontend:
 
         self.current_search_button = Button(self.root, text="Current",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.current_search(actual_loc))
         self.forecast_search_button = Button(self.root, text="Forecast",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.forecast_search(actual_loc))
-        self.astronomy_search_button = Button(self.root, text="Astronomy",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: print("2"))
+        self.astronomy_search_button = Button(self.root, text="Astronomy",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.astro_search(actual_loc))
         self.caclulator_init_button = Button(self.root, text="Calculator",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.calculator_search())
 
         curr_btn_win = self.main_canvas_3.create_window(36, 120, anchor='nw', window=self.current_search_button)
@@ -144,11 +145,11 @@ class SpeckFrontend:
         top.geometry('323x576')
         top.resizable(width=False, height="false")
 
-        lbl = Label(top, text=f"{cur_data.temp_c()}°C", font=("Helvetica", 24))
+        lbl = Label(top, text=f"{cur_data.temp_c()}°C", font=("Helvetica", 24), fg="dark blue")
         lbl2 = Label(top, text=f"{cur_data.location.name},\n{cur_data.location.country}", font=("Helvetica", font))
 
-        lbl.pack()
         lbl2.pack()
+        lbl.pack()
 
         temp_unit = StringVar()
         temp_unit.set("C")
@@ -161,7 +162,7 @@ class SpeckFrontend:
             else:
                 lbl.config(text=f"{cur_data.temp_c.fahrenheit()}°F")
 
-        checkbtn=Button(top,text="update", font=("Helvetica",20), width=15, fg="dark blue", command=lambda: clicked(temp_unit.get()))
+        checkbtn = Button(top,text="update", font=("Helvetica",20), width=15, fg="dark blue", command=lambda: clicked(temp_unit.get()))
         checkbtn.pack()
 
         close_btn_1 = Button(top, text="Close",font=("Helvetica",20), width=15, fg="dark blue", command=top.destroy).pack()
@@ -183,20 +184,62 @@ class SpeckFrontend:
         lbl = Label(top, text=f"\n{fore_data[0].location.name},\n{fore_data[0].location.country}", font=("Helvetica", font))
         lbl.pack()
 
+        options = []
+
         for n, i in enumerate(fore_data):
-            cdt = dt.now()
-            ndt = dt(cdt.year, cdt.month, cdt.day + n + 1)
+            ndt = dt.now() + td(days=n+1)
 
-            txt = f"\n\nForecasted average temperature on\n{ndt.day}-{ndt.month}-{ndt.year}: {i.day.avgtemp_c()}°C\n\n"
+            options.append(f"{ndt.day}-{ndt.month}-{ndt.year}")
 
-            lbl_tmp = Label(top, text=txt, font=("Helvetica", 14))
-            lbl_tmp.pack()
+        main_info_lbl = Label(top, text=f"\n\nAverage temperature on {options[0]}:\n{fore_data[0].day.avgtemp_c()}°C\n\n", font=("Helvetica", 12), fg="dark blue")
+        main_info_lbl.pack()
 
-            #        [a, v, c, efkef,]
-            #
-            #        for var1, var2 in enumerate(list1):
-            #            a -> v -> c -> efkef
-            #            0 -> 1 -> 2 -> 3
+        day_select_menu = StringVar()
+        day_select_menu.set(options[0])
+
+        day_select_drop = OptionMenu(top, day_select_menu, *options)
+        day_select_drop.pack()
+        day_select_drop.config(width=16, font=("Helvetica", 16), fg="dark blue")
+
+        def callback():
+            n = options.index(day_select_menu.get())
+            main_info_lbl.config(text=f"\n\nAverage temperature on {options[n]}:\n{fore_data[n].day.avgtemp_c()}°C\n\n", fg="dark blue")
+
+        _lbl = Label(top, text="\n\n\n\n")
+        _lbl.pack()
+
+        update_btn = Button(top, text="Update", font=("Helvetica", 12), command=callback).pack()
+
+        # [a, v, c, efkef,]
+        #
+        # for var1, var2 in enumerate(list1):
+        #     a -> v -> c -> efkef
+        #     0 -> 1 -> 2 -> 3
+
+    def astro_search(self, loc):
+        try:
+            cur_data = self.speck.astro(loc)
+        except InvalidRequestUrl:
+            rloc = self.speck.astro(loc)[0]
+            cur_data = self.speck.astro(f"{rloc['lat']},{rloc['lon']}")
+
+        font = int(min((30 - len(cur_data.location.name)), 24))
+
+        print(30 - len(cur_data.location.name))
+        
+        top = Toplevel()
+        top.title(f"Astronomy Information in {cur_data.location.name}")
+        top.geometry('323x576')
+        top.resizable(width=False, height="false")
+
+        
+        lbl2 = Label(top, text=f"\n\n{cur_data.location.name},\n{cur_data.location.country}", font=("Helvetica", font))
+        lbl = Label(top, text=f"\n\nMoon Phase Today:\n{cur_data.moon_phase}\n\n", font=("Helvetica", 16), fg="dark blue")
+
+        lbl2.pack()
+        lbl.pack()
+
+        close_btn_1 = Button(top, text="Close",font=("Helvetica",20), width=15, fg="dark blue", command=top.destroy).pack()
 
     def calculator_search(self):
         calculator.main()
