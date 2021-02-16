@@ -59,7 +59,7 @@ class SpeckFrontend:
             self.speck = Speck(f.read().rstrip())
 
     def welcome(self):
-        """Welcome screen."""
+        """Implementation for Welcome screen."""
         # Step 1 in program flow
         if ('SPECK_DEV' not in os.environ and \
             (self.welcome_username_entry.get() == 'username' or \
@@ -84,10 +84,10 @@ class SpeckFrontend:
             self.location_entry() # Move onto step 2
 
     def location_entry(self):
-        """Location Entry Screen."""
+        """Implementation for Location Entry Screen."""
         # Step 2 in program flow
-        self.main_canvas_2 = Canvas(self.root, width=323, height=576,bd=0, highlightthickness=0)
-        self.main_canvas_2.pack(fill="both",expand=True)
+        self.main_canvas_2 = Canvas(self.root, width=323, height=576, bd=0, highlightthickness=0)
+        self.main_canvas_2.pack(fill="both", expand=True)
         self.main_canvas_2.create_image(0, 0, image=self.bg, anchor="nw")
 
         self.location_entry = Entry(self.root, font=("Helvetica", 24), width=14, fg="dark blue", bd=0)
@@ -95,7 +95,7 @@ class SpeckFrontend:
 
         def clear_location_entry():
             if self.location_entry.get() == "Enter Location":
-                self.location_entry.delete(0,END)
+                self.location_entry.delete(0, END)
 
         self.location_entry.bind("<Button-1>", lambda e: clear_location_entry())
 
@@ -105,9 +105,11 @@ class SpeckFrontend:
         location_input_button_win = self.main_canvas_2.create_window(36, 470, anchor='nw', window=self.location_input_button)
 
     def type_entry(self):
-        """Type Entry Screen."""
+        """Implementation for Data Type Entry Screen."""
         # Step 3 in program flow
         actual_loc = self.location_entry.get()
+
+        self.bg = ImageTk.PhotoImage(file='./res/beach_logo_small.png')
 
         self.location_entry.destroy()
         self.location_input_button.destroy()
@@ -130,6 +132,7 @@ class SpeckFrontend:
     ## Step 3 Implementations ===================
 
     def current_search(self, loc):
+        """Implementation for Current Weather screen."""
         try:
             cur_data = self.speck.current(loc)
         except InvalidRequestUrl:
@@ -165,9 +168,10 @@ class SpeckFrontend:
         checkbtn = Button(top,text="update", font=("Helvetica",20), width=15, fg="dark blue", command=lambda: clicked(temp_unit.get()))
         checkbtn.pack()
 
-        close_btn_1 = Button(top, text="Close",font=("Helvetica",20), width=15, fg="dark blue", command=top.destroy).pack()
+        close_btn_1 = Button(top, text="Close", font=("Helvetica",20), width=15, fg="dark blue", command=top.destroy).pack()
 
     def forecast_search(self, loc):
+        """Implementation for Weather Forecast screen."""
         try:
             fore_data = self.speck.forecast(loc)
         except InvalidRequestUrl:
@@ -210,13 +214,8 @@ class SpeckFrontend:
 
         update_btn = Button(top, text="Update", font=("Helvetica", 12), command=callback).pack()
 
-        # [a, v, c, efkef,]
-        #
-        # for var1, var2 in enumerate(list1):
-        #     a -> v -> c -> efkef
-        #     0 -> 1 -> 2 -> 3
-
     def astro_search(self, loc):
+        """Implementation for Astronomy Information screen."""
         try:
             cur_data = self.speck.astro(loc)
         except InvalidRequestUrl:
@@ -239,21 +238,23 @@ class SpeckFrontend:
         lbl2.pack()
         lbl.pack()
 
-        close_btn_1 = Button(top, text="Close",font=("Helvetica",20), width=15, fg="dark blue", command=top.destroy).pack()
+        close_btn_1 = Button(top, text="Close", font=("Helvetica",20), width=15, fg="dark blue", command=top.destroy).pack()
 
     def calculator_search(self):
+        """Run the calculator."""
         calculator.main()
 
     ## ==========================================
 
     def run(self):
+        """Run the entire application. This is blocking."""
         self.root = Tk()
         self.root.title('Speck Frontend')
         self.root.geometry('323x576')
         # make sure app cant be resized
         self.root.resizable(width=False, height="false")
 
-        self.bg = ImageTk.PhotoImage(file='./res/beach.png')
+        self.bg = ImageTk.PhotoImage(file='./res/beach_logo.png')
 
         self.main_canvas = Canvas(self.root, width=323, height=576, bd=0, highlightthickness=0)
         self.main_canvas.pack(fill="both", expand=True)
@@ -261,18 +262,18 @@ class SpeckFrontend:
         # put img on canvas
         self.main_canvas.create_image(0, 0, image=self.bg, anchor="nw")
 
-        self.welcome_username_entry = Entry(self.root, font=("Helvetica",24), width=14, fg="dark blue",bd=0)
-        self.welcome_password_entry = Entry(self.root, font=("Helvetica",24), width=14, fg="dark blue",bd=0)
+        self.welcome_username_entry = Entry(self.root, font=("Helvetica",24), width=14, fg="dark blue", bd=0)
+        self.welcome_password_entry = Entry(self.root, font=("Helvetica",24), width=14, fg="dark blue", bd=0)
 
-        self.welcome_username_entry.insert(0,"username")
-        self.welcome_password_entry.insert(0,"password")
+        self.welcome_username_entry.insert(0, "username")
+        self.welcome_password_entry.insert(0, "password")
 
         def entry_clear(e):
             if (self.welcome_username_entry.get() == 'username' or \
                 self.welcome_password_entry.get() == 'password'):
 
-                self.welcome_username_entry.delete(0,END)
-                self.welcome_password_entry.delete(0,END)
+                self.welcome_username_entry.delete(0, END)
+                self.welcome_password_entry.delete(0, END)
                 # change pw to ***
                 self.welcome_password_entry.config(show='*')
 
@@ -281,14 +282,13 @@ class SpeckFrontend:
         self.welcome_password_entry.bind("<Button-1>", entry_clear)
 
         # add entry boxes to canvas
-        un_window = self.main_canvas.create_window(34,290, anchor='nw', window=self.welcome_username_entry)
-        pw_window = self.main_canvas.create_window(34,370, anchor='nw', window=self.welcome_password_entry)
+        un_window = self.main_canvas.create_window(34, 290, anchor='nw', window=self.welcome_username_entry)
+        pw_window = self.main_canvas.create_window(34, 370, anchor='nw', window=self.welcome_password_entry)
 
-        self.welcome_login_button = Button(self.root, text="LOGIN", font=("Helvetica", 20), width=15,fg="dark blue", command=self.welcome)
-        welcome_login_button_win = self.main_canvas.create_window(36,470, anchor='nw', window=self.welcome_login_button)
+        self.welcome_login_button = Button(self.root, text="LOGIN", font=("Helvetica", 20), width=15, fg="dark blue", command=self.welcome)
+        welcome_login_button_win = self.main_canvas.create_window(36, 470, anchor='nw', window=self.welcome_login_button)
 
         self.root.mainloop()
-
 
 if __name__ == '__main__':
     app = SpeckFrontend() # Create an instance
