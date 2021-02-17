@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/42mix/speck/d84974db1b4ad29c2192533fea2a20f45f7552ec/res/logo.svg?token=AM7JY2UMRVCWN5F3DVOYQP3AFUVHU" align=center>
+<img src="https://raw.githubusercontent.com/42mix/speck/d84974db1b4ad29c2192533fea2a20f45f7552ec/res/logo.svg?token=AM7JY2UMRVCWN5F3DVOYQP3AFUVHU" align="center">
 
 <h1 align="center">Speck</h1>
 
