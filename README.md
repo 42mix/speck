@@ -1,6 +1,6 @@
-<img src="https://raw.githubusercontent.com/42mix/speck/d84974db1b4ad29c2192533fea2a20f45f7552ec/res/logo.svg?token=AM7JY2UMRVCWN5F3DVOYQP3AFUVHU" align="center">
+<p align="center"><img src="https://raw.githubusercontent.com/42mix/speck/d84974db1b4ad29c2192533fea2a20f45f7552ec/res/logo.svg?token=AM7JY2UMRVCWN5F3DVOYQP3AFUVHU"></p>
 
-<h1 align="center">Speck</h1>
+#
 
 Simple library to get current and forecatsed weather information. Needs Python 3.6+
 

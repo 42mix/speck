@@ -3,7 +3,7 @@ import os
 from speck.speck import Speck
 from speck.errors import *
 
-import calculator
+from misc import calculator
 
 from tkinter import *
 from tkinter import messagebox
