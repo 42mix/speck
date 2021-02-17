@@ -1,4 +1,7 @@
-# SPECK
+<img src="https://github.com/42mix/speck/blob/ui-next/res/logo.svg?raw=true>
+
+<h1 align="center">Speck</h1>
+
 Simple library to get current and forecatsed weather information. Needs Python 3.6+
 
 Powered by <a href="https://www.weatherapi.com/" title="Free Weather API">WeatherAPI.com</a>

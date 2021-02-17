@@ -17,8 +17,8 @@ from datetime import timedelta as td
 
 class SpeckFrontend:
     def __init__(self):
-        ##       Program Flow
-        ##       ------------
+        ##     Application Flow
+        ##     ----------------
         ##
         ##      Welcome Screen
         ##  Username and Password Entry
@@ -38,8 +38,6 @@ class SpeckFrontend:
         self.root = None
 
         self.main_canvas = None
-        self.main_canvas_2 = None
-        self.main_canvas_3 = None # One canvas for each screen
 
         self.welcome_username_entry = None
         self.welcome_password_entry = None
@@ -60,7 +58,7 @@ class SpeckFrontend:
 
     def welcome(self):
         """Implementation for Welcome screen."""
-        # Step 1 in program flow
+        # Step 1 in application flow
         if ('SPECK_DEV' not in os.environ and \
             (self.welcome_username_entry.get() == 'username' or \
             self.welcome_username_entry.get() == '' or \
@@ -85,12 +83,13 @@ class SpeckFrontend:
 
     def location_entry(self):
         """Implementation for Location Entry Screen."""
-        # Step 2 in program flow
-        self.main_canvas_2 = Canvas(self.root, width=323, height=576, bd=0, highlightthickness=0)
-        self.main_canvas_2.pack(fill="both", expand=True)
-        self.main_canvas_2.create_image(0, 0, image=self.bg, anchor="nw")
+        # Step 2 in application flow
 
-        self.location_entry = Entry(self.root, font=("Helvetica", 24), width=14, fg="dark blue", bd=0)
+        self.main_canvas = Canvas(self.root, width=323, height=576, bd=0, highlightthickness=0) # reset canvas
+        self.main_canvas.pack(fill="both", expand=True)
+        self.main_canvas.create_image(0, 0, image=self.bg, anchor="nw")
+
+        self.location_entry = Entry(self.root, font=("Helvetica", 22), width=15, fg="dark blue", bd=0)
         self.location_entry.insert(0, "Enter Location")
 
         def clear_location_entry():
@@ -99,35 +98,35 @@ class SpeckFrontend:
 
         self.location_entry.bind("<Button-1>", lambda e: clear_location_entry())
 
-        location_entry_window = self.main_canvas_2.create_window(34, 290, anchor='nw', window=self.location_entry)
+        location_entry_window = self.main_canvas.create_window(38, 340, anchor='nw', window=self.location_entry)
 
-        self.location_input_button = Button(self.root, text='Continue', font=('Helvetica', 20), width=15, fg='dark blue', command=self.type_entry)
-        location_input_button_win = self.main_canvas_2.create_window(36, 470, anchor='nw', window=self.location_input_button)
+        self.location_input_button = Button(self.root, text='Continue', font=('Helvetica', 20), width=15, fg='dark blue', bd=0, bg="white", command=self.type_entry)
+        location_input_button_win = self.main_canvas.create_window(36, 420, anchor='nw', window=self.location_input_button)
 
     def type_entry(self):
         """Implementation for Data Type Entry Screen."""
-        # Step 3 in program flow
+        # Step 3 in application flow
         actual_loc = self.location_entry.get()
 
-        self.bg = ImageTk.PhotoImage(file='./res/beach_logo_small.png')
+        self.bg = ImageTk.PhotoImage(file='./res/secondary_logo.png')
 
         self.location_entry.destroy()
         self.location_input_button.destroy()
-        self.main_canvas_2.destroy()
+        self.main_canvas.destroy()
 
-        self.main_canvas_3 = Canvas(self.root, width=323, height=576, bd=0, highlightthickness=0)
-        self.main_canvas_3.pack(fill="both", expand=True)
-        self.main_canvas_3.create_image(0, 0, image=self.bg, anchor="nw")
+        self.main_canvas = Canvas(self.root, width=323, height=576, bd=0, highlightthickness=0)
+        self.main_canvas.pack(fill="both", expand=True)
+        self.main_canvas.create_image(0, 0, image=self.bg, anchor="nw")
 
-        self.current_search_button = Button(self.root, text="Current",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.current_search(actual_loc))
-        self.forecast_search_button = Button(self.root, text="Forecast",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.forecast_search(actual_loc))
-        self.astronomy_search_button = Button(self.root, text="Astronomy",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.astro_search(actual_loc))
-        self.caclulator_init_button = Button(self.root, text="Calculator",font=("Helvetica",20), width=15,fg="dark blue", command=lambda: self.calculator_search())
+        self.current_search_button = Button(self.root, text="Current", font=("Helvetica", 20), width=14, fg="dark blue", command=lambda: self.current_search(actual_loc))
+        self.forecast_search_button = Button(self.root, text="Forecast", font=("Helvetica", 20), width=14, fg="dark blue", command=lambda: self.forecast_search(actual_loc))
+        self.astronomy_search_button = Button(self.root, text="Astronomy", font=("Helvetica", 20), width=14, fg="dark blue", command=lambda: self.astro_search(actual_loc))
+        self.caclulator_init_button = Button(self.root, text="Calculator", font=("Helvetica", 20), width=14, fg="dark blue", command=lambda: self.calculator_search())
 
-        curr_btn_win = self.main_canvas_3.create_window(36, 120, anchor='nw', window=self.current_search_button)
-        fore_btn_win = self.main_canvas_3.create_window(36, 240, anchor='nw', window=self.forecast_search_button)
-        astro_btn_win = self.main_canvas_3.create_window(36, 360, anchor='nw', window=self.astronomy_search_button)
-        calc_btn_win = self.main_canvas_3.create_window(36, 480, anchor='nw', window=self.caclulator_init_button)
+        curr_btn_win = self.main_canvas.create_window(38, 220, anchor='nw', window=self.current_search_button)
+        fore_btn_win = self.main_canvas.create_window(38, 280, anchor='nw', window=self.forecast_search_button)
+        astro_btn_win = self.main_canvas.create_window(38, 340, anchor='nw', window=self.astronomy_search_button)
+        calc_btn_win = self.main_canvas.create_window(38, 400, anchor='nw', window=self.caclulator_init_button)
 
     ## Step 3 Implementations ===================
 
@@ -148,22 +147,23 @@ class SpeckFrontend:
         top.geometry('323x576')
         top.resizable(width=False, height="false")
 
-        lbl = Label(top, text=f"{cur_data.temp_c()}°C", font=("Helvetica", 24), fg="dark blue")
-        lbl2 = Label(top, text=f"{cur_data.location.name},\n{cur_data.location.country}", font=("Helvetica", font))
+        loc_label = Label(top, text=f"{cur_data.location.name},\n{cur_data.location.country}", font=("Helvetica", font))
+        temp_label = Label(top, text=f"{cur_data.temp_c()}°C", font=("Helvetica", 24), fg="dark blue")
 
-        lbl2.pack()
-        lbl.pack()
+        loc_label.pack()
+        temp_label.pack()
 
         temp_unit = StringVar()
-        temp_unit.set("C")
-        for i in ['C', 'F']:
+        temp_unit.set("°C")
+
+        for i in ['°C', '°F']:
             Radiobutton(top, text=i, variable=temp_unit, value=i, font=("Helvetica",20)).pack(anchor=W)
 
         def clicked(val):
             if val == 'C':
-                lbl.config(text=f"{cur_data.temp_c()}°C")
+                temp_label.config(text=f"{cur_data.temp_c()}°C")
             else:
-                lbl.config(text=f"{cur_data.temp_c.fahrenheit()}°F")
+                temp_label.config(text=f"{cur_data.temp_c.fahrenheit()}°F")
 
         checkbtn = Button(top,text="update", font=("Helvetica",20), width=15, fg="dark blue", command=lambda: clicked(temp_unit.get()))
         checkbtn.pack()
@@ -254,7 +254,7 @@ class SpeckFrontend:
         # make sure app cant be resized
         self.root.resizable(width=False, height="false")
 
-        self.bg = ImageTk.PhotoImage(file='./res/beach_logo.png')
+        self.bg = ImageTk.PhotoImage(file='./res/base_login.png')
 
         self.main_canvas = Canvas(self.root, width=323, height=576, bd=0, highlightthickness=0)
         self.main_canvas.pack(fill="both", expand=True)
@@ -262,8 +262,8 @@ class SpeckFrontend:
         # put img on canvas
         self.main_canvas.create_image(0, 0, image=self.bg, anchor="nw")
 
-        self.welcome_username_entry = Entry(self.root, font=("Helvetica",24), width=14, fg="dark blue", bd=0)
-        self.welcome_password_entry = Entry(self.root, font=("Helvetica",24), width=14, fg="dark blue", bd=0)
+        self.welcome_username_entry = Entry(self.root, font=("Helvetica", 22), width=15, fg="dark blue", bd=0)
+        self.welcome_password_entry = Entry(self.root, font=("Helvetica", 22), width=15, fg="dark blue", bd=0)
 
         self.welcome_username_entry.insert(0, "username")
         self.welcome_password_entry.insert(0, "password")
@@ -282,11 +282,11 @@ class SpeckFrontend:
         self.welcome_password_entry.bind("<Button-1>", entry_clear)
 
         # add entry boxes to canvas
-        un_window = self.main_canvas.create_window(34, 290, anchor='nw', window=self.welcome_username_entry)
-        pw_window = self.main_canvas.create_window(34, 370, anchor='nw', window=self.welcome_password_entry)
+        un_window = self.main_canvas.create_window(38, 300, anchor='nw', window=self.welcome_username_entry)
+        pw_window = self.main_canvas.create_window(38, 370, anchor='nw', window=self.welcome_password_entry)
 
-        self.welcome_login_button = Button(self.root, text="LOGIN", font=("Helvetica", 20), width=15, fg="dark blue", command=self.welcome)
-        welcome_login_button_win = self.main_canvas.create_window(36, 470, anchor='nw', window=self.welcome_login_button)
+        self.welcome_login_button = Button(self.root, text="LOGIN", font=("Helvetica", 18), width=16, fg="dark blue", bg="white", bd=0, command=self.welcome)
+        welcome_login_button_win = self.main_canvas.create_window(44, 442, anchor='nw', window=self.welcome_login_button)
 
         self.root.mainloop()
 
