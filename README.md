@@ -1,4 +1,4 @@
-<p align="center"><img src="https://raw.githubusercontent.com/42mix/speck/d84974db1b4ad29c2192533fea2a20f45f7552ec/res/logo.svg?token=AM7JY2UMRVCWN5F3DVOYQP3AFUVHU"></p>
+<p align="center"><img src="https://cdn.discordapp.com/attachments/765443917952843776/811609882461470751/logo.svg"></p>
 
 #
 
