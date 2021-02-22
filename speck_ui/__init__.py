@@ -1,2 +1,2 @@
 from . import calculator
-from . import ui
+from .style import *

@@ -3,7 +3,7 @@ import os
 from speck.speck import Speck
 from speck.errors import *
 
-from misc import calculator, ui
+import speck_ui
 
 from tkinter import *
 from tkinter import messagebox
@@ -51,7 +51,7 @@ class SpeckFrontend:
 
         self.root = None
 
-        self.style = ui.SpeckStyle.from_file("style.json")
+        self.style = speck_ui.SpeckStyle.from_file("style.json")
 
         with open("token.txt", "r") as f:
             self.speck = Speck(f.read().rstrip())
@@ -459,7 +459,7 @@ class SpeckFrontend:
 
     def calculator_search(self):
         """Run the calculator."""
-        calculator.main()
+        speck_ui.calculator.main()
 
     ## ==========================================
 
