@@ -2,9 +2,7 @@
 
 #
 
-Simple library to get current and forecatsed weather information. Needs Python 3.6+
-
-Powered by <a href="https://www.weatherapi.com/" title="Free Weather API">WeatherAPI.com</a>
+Simple Python API wrapper for [WeatherAPI.com](https://www.weatherapi.com/). Implementations are incomplete as of now.
 
 City Data
 ---------
