@@ -323,24 +323,25 @@ class SpeckFrontend:
             else:
                 temp_label.config(text=f"{cur_data.temp_c.fahrenheit()}°F")
 
-        checkbtn = Button(
+        update_button = Button(
             top,
             text    = "Update",
-            font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_medium),
+            font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_small),
             width   = 15,
             fg      = self.style.colors["primary"].fg,
             command = lambda: clicked(temp_unit.get())
         )
-        checkbtn.pack()
+        update_button.pack()
 
-        close_btn_1 = Button(
+        close_button = Button(
             top,
-            text="Close",
-            font=("Helvetica",20),
-            width=15,
-            fg="dark blue",
-            command=top.destroy
-        ).pack()
+            text    = "Close",
+            font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_small),
+            width   = 15,
+            fg      = self.style.colors["primary"].fg,
+            command = top.destroy
+        )
+        close_button.pack()
 
     def forecast_search(self, loc):
         """Implementation for Weather Forecast screen."""
@@ -397,13 +398,23 @@ class SpeckFrontend:
         _lbl = Label(top, text="\n\n\n\n")
         _lbl.pack()
 
-        update_btn = Button(
+        update_button = Button(
             top,
             text    = "Update",
             font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_small),
             command = callback
         )
-        update_btn.pack()
+        update_button.pack()
+
+        close_button = Button(
+            top,
+            text    = "Close",
+            font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_small),
+            width   = 15,
+            fg      = self.style.colors["primary"].fg,
+            command = top.destroy
+        )
+        close_button.pack()
 
     def astro_search(self, loc):
         """Implementation for Astronomy Information screen."""
@@ -436,14 +447,15 @@ class SpeckFrontend:
         lbl.pack()
         lbl2.pack()
 
-        close_btn_1 = Button(
+        close_button = Button(
             top,
             text    = "Close",
             font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_small),
             width   = 15,
             fg      = self.style.colors["primary"].fg,
             command = top.destroy
-        ).pack()
+        )
+        close_button.pack()
 
     def calculator_search(self):
         """Run the calculator."""
