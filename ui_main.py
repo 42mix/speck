@@ -35,17 +35,7 @@ class SpeckFrontend:
 
         self.main_canvas = None
 
-        self.welcome_username_entry = None
-        self.welcome_password_entry = None
-        self.welcome_login_button = None
-
-        self.location_input_entry = None
-        self.location_input_button = None
-
-        self.current_search_button = None
-        self.forecast_search_button = None
-        self.astronomy_search_button = None
-        self.caclulator_init_button = None
+        self.active_widgets = []
 
         self.bg = None
 
@@ -61,36 +51,18 @@ class SpeckFrontend:
         if widget:
             widget.destroy()
 
+    def __cleanup_active_widgets(self):
+        for i in self.active_widgets:
+            SpeckFrontend.__cleanup_widget(i)
+
+    # Flow --------------------------------------
+
     def welcome(self):
         """Implementation for Welcome screen."""
         # Step 1 in application flow
 
         SpeckFrontend.__cleanup_widget(self.main_canvas)
-        SpeckFrontend.__cleanup_widget(self.location_input_entry)
-        SpeckFrontend.__cleanup_widget(self.location_input_entry)
-
-        def check_login():
-            if ('SPECK_DEV' not in os.environ and \
-                (self.welcome_username_entry.get() == 'username' or \
-                self.welcome_username_entry.get() == '' or \
-                self.welcome_password_entry.get() == 'password' or \
-                self.welcome_password_entry.get() == '')):
-
-                response = messagebox.showwarning("ERROR","ENTER USERNAME AND PASSWORD")
-
-            elif ('SPECK_DEV' not in os.environ and \
-                (self.welcome_username_entry.get() != '11C' or \
-                self.welcome_password_entry.get() != '11c2021')):
-                
-                response = messagebox.showwarning("ERROR","ENTER CORRECT USERNAME AND PASSWORD")
-
-            else:
-                self.welcome_username_entry.destroy()
-                self.welcome_password_entry.destroy()
-                self.welcome_login_button.destroy()
-                self.main_canvas.destroy()
-
-                self.location_entry() # Move onto step 2
+        self.__cleanup_active_widgets()
 
         self.bg = ImageTk.PhotoImage(file='./res/base_login.png')
 
@@ -104,42 +76,62 @@ class SpeckFrontend:
         self.main_canvas.pack(fill="both", expand=True)
         self.main_canvas.create_image(0, 0, image=self.bg, anchor="nw") # put img on canvas
 
-        self.welcome_username_entry = Entry(
+        welcome_username_entry = Entry(
             self.root,
             font  = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_medium),
             width = 15,
             fg    = self.style.colors["primary"].fg,
             bd    = 0
         )
-        self.welcome_password_entry = Entry(
+        welcome_password_entry = Entry(
             self.root,
             font  = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_medium),
             width = 15,
             fg    = self.style.colors["primary"].fg,
             bd    = 0
         )
+        self.active_widgets.append(welcome_username_entry)
+        self.active_widgets.append(welcome_password_entry)
 
-        self.welcome_username_entry.insert(0, "Username")
-        self.welcome_password_entry.insert(0, "Password")
+        welcome_username_entry.insert(0, "Username")
+        welcome_password_entry.insert(0, "Password")
+
+        def check_login():
+            if ('SPECK_DEV' not in os.environ and \
+                (welcome_username_entry.get() == 'username' or \
+                welcome_username_entry.get() == '' or \
+                welcome_password_entry.get() == 'password' or \
+                welcome_password_entry.get() == '')):
+
+                response = messagebox.showwarning("ERROR","ENTER USERNAME AND PASSWORD")
+
+            elif ('SPECK_DEV' not in os.environ and \
+                (welcome_username_entry.get() != '11C' or \
+                welcome_password_entry.get() != '11c2021')):
+                
+                response = messagebox.showwarning("ERROR","ENTER CORRECT USERNAME AND PASSWORD")
+
+            else:
+                self.location_entry() # Move onto step 2
 
         def entry_clear(e):
-            if (self.welcome_username_entry.get().lower() == 'username' or \
-                self.welcome_password_entry.get().lower() == 'password'):
+            if (welcome_username_entry.get().lower() == 'username' or \
+                welcome_password_entry.get().lower() == 'password'):
 
-                self.welcome_username_entry.delete(0, END)
-                self.welcome_password_entry.delete(0, END)
+                welcome_username_entry.delete(0, END)
+                welcome_password_entry.delete(0, END)
                 # change pw to ***
-                self.welcome_password_entry.config(show='*')
+                welcome_password_entry.config(show='*')
 
         # bind the entry boxes, ie when you click it, the text on input box shd vanish
-        self.welcome_username_entry.bind("<Button-1>", entry_clear)
-        self.welcome_password_entry.bind("<Button-1>", entry_clear)
+        welcome_username_entry.bind("<Button-1>", entry_clear)
+        welcome_password_entry.bind("<Button-1>", entry_clear)
 
         # add entry boxes to canvas
-        un_window = self.main_canvas.create_window(38, 325, anchor='nw', window=self.welcome_username_entry)
-        pw_window = self.main_canvas.create_window(38, 380, anchor='nw', window=self.welcome_password_entry)
+        un_window = self.main_canvas.create_window(38, 325, anchor='nw', window=welcome_username_entry)
+        pw_window = self.main_canvas.create_window(38, 380, anchor='nw', window=welcome_password_entry)
 
-        self.welcome_login_button = Button(
+        welcome_login_button = Button(
             self.root,
             text    = "LOGIN",
             font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_small),
@@ -149,7 +141,9 @@ class SpeckFrontend:
             bd      = 0,
             command = check_login
         )
-        welcome_login_button_win = self.main_canvas.create_window(38, 435, anchor='nw', window=self.welcome_login_button)
+        self.active_widgets.append(welcome_login_button)
+
+        welcome_login_button_win = self.main_canvas.create_window(38, 435, anchor='nw', window=welcome_login_button)
 
     def location_entry(self):
         """Implementation for Location Entry Screen."""
@@ -158,10 +152,7 @@ class SpeckFrontend:
         self.bg = ImageTk.PhotoImage(file='./res/base_login.png')
 
         SpeckFrontend.__cleanup_widget(self.main_canvas)
-        SpeckFrontend.__cleanup_widget(self.current_search_button)
-        SpeckFrontend.__cleanup_widget(self.forecast_search_button)
-        SpeckFrontend.__cleanup_widget(self.astronomy_search_button)
-        SpeckFrontend.__cleanup_widget(self.caclulator_init_button )
+        self.__cleanup_active_widgets()
 
         self.main_canvas = Canvas(
             self.root,
@@ -173,24 +164,26 @@ class SpeckFrontend:
         self.main_canvas.pack(fill="both", expand=True)
         self.main_canvas.create_image(0, 0, image=self.bg, anchor="nw")
 
-        self.location_input_entry = Entry(
+        location_input_entry = Entry(
             self.root,
             font  = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_medium),
             width = 15,
             fg    = self.style.colors["primary"].fg,
             bd    = 0
         )
-        self.location_input_entry.insert(0, "Search Location")
+        self.active_widgets.append(location_input_entry)
 
-        def clear_location_entry():
-            if self.location_input_entry.get().lower() == "search location":
-                self.location_input_entry.delete(0, END)
+        location_input_entry.insert(0, "Search Location")
 
-        self.location_input_entry.bind("<Button-1>", lambda e: clear_location_entry())
+        def clear_location_entry(e):
+            if location_input_entry.get().lower() == "search location":
+                location_input_entry.delete(0, END)
 
-        location_entry_window = self.main_canvas.create_window(38, 355, anchor='nw', window=self.location_input_entry)
+        location_input_entry.bind("<Button-1>", clear_location_entry)
 
-        self.location_input_button = Button(
+        location_entry_window = self.main_canvas.create_window(38, 355, anchor='nw', window=location_input_entry)
+
+        location_input_button = Button(
             self.root,
             text    = "Continue",
             font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_small),
@@ -198,20 +191,19 @@ class SpeckFrontend:
             fg      = self.style.colors["primary"].fg,
             bg      = self.style.colors["primary"].bg,
             bd      = 0,
-            command = self.type_entry
+            command = lambda: self.type_entry(location_input_entry.get())
         )
-        location_input_button_win = self.main_canvas.create_window(38, 405, anchor='nw', window=self.location_input_button)
+        self.active_widgets.append(location_input_button)
 
-    def type_entry(self):
+        location_input_button_win = self.main_canvas.create_window(38, 405, anchor='nw', window=location_input_button)
+
+    def type_entry(self, actual_loc):
         """Implementation for Data Type Entry Screen."""
         # Step 3 in application flow
-        actual_loc = self.location_input_entry.get()
-
         self.bg = ImageTk.PhotoImage(file='./res/secondary_logo.png')
 
         SpeckFrontend.__cleanup_widget(self.main_canvas)
-        SpeckFrontend.__cleanup_widget(self.location_input_entry)
-        SpeckFrontend.__cleanup_widget(self.location_input_button)
+        self.__cleanup_active_widgets()
 
         self.main_canvas = Canvas(
             self.root,
@@ -223,7 +215,7 @@ class SpeckFrontend:
         self.main_canvas.pack(fill="both", expand=True)
         self.main_canvas.create_image(0, 0, image=self.bg, anchor="nw")
 
-        self.current_search_button = Button(
+        current_search_button = Button(
             self.root,
             text    = "Current",
             font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_medium),
@@ -231,7 +223,7 @@ class SpeckFrontend:
             fg      = self.style.colors["primary"].fg,
             command = lambda: self.current_search(actual_loc)
         )
-        self.forecast_search_button = Button(
+        forecast_search_button = Button(
             self.root,
             text    = "Forecast",
             font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_medium),
@@ -239,7 +231,7 @@ class SpeckFrontend:
             fg      = self.style.colors["primary"].fg,
             command = lambda: self.forecast_search(actual_loc)
         )
-        self.astronomy_search_button = Button(
+        astronomy_search_button = Button(
             self.root,
             text    = "Astronomy",
             font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_medium),
@@ -247,7 +239,7 @@ class SpeckFrontend:
             fg      = self.style.colors["primary"].fg,
             command = lambda: self.astro_search(actual_loc)
         )
-        self.caclulator_init_button = Button(
+        caclulator_init_button = Button(
             self.root,
             text    = "Calculator",
             font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_medium),
@@ -256,12 +248,17 @@ class SpeckFrontend:
             command = lambda: self.calculator_search()
         )
 
-        curr_btn_win  = self.main_canvas.create_window(38, 220, anchor='nw', window=self.current_search_button)
-        fore_btn_win  = self.main_canvas.create_window(38, 280, anchor='nw', window=self.forecast_search_button)
-        astro_btn_win = self.main_canvas.create_window(38, 340, anchor='nw', window=self.astronomy_search_button)
-        calc_btn_win  = self.main_canvas.create_window(38, 400, anchor='nw', window=self.caclulator_init_button)
+        self.active_widgets.append(current_search_button)
+        self.active_widgets.append(forecast_search_button)
+        self.active_widgets.append(astronomy_search_button)
+        self.active_widgets.append(caclulator_init_button)
 
-        self.back_btn = Button(
+        curr_btn_win  = self.main_canvas.create_window(38, 220, anchor='nw', window=current_search_button)
+        fore_btn_win  = self.main_canvas.create_window(38, 280, anchor='nw', window=forecast_search_button)
+        astro_btn_win = self.main_canvas.create_window(38, 340, anchor='nw', window=astronomy_search_button)
+        calc_btn_win  = self.main_canvas.create_window(38, 400, anchor='nw', window=caclulator_init_button)
+
+        back_btn = Button(
             self.root,
             text    = 'Back',
             font    = (self.style.fonts["primary"].family, self.style.fonts["primary"].size_small),
@@ -271,7 +268,9 @@ class SpeckFrontend:
             bd      = 0,
             command = self.location_entry, highlightthickness=0
         )
-        back_btn = self.main_canvas.create_window(124, 46, anchor='nw', window=self.back_btn)
+        self.active_widgets.append(back_btn)
+
+        back_btn = self.main_canvas.create_window(124, 46, anchor='nw', window=back_btn)
 
     ## Step 3 Implementations ===================
 
