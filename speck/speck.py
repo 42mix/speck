@@ -339,13 +339,13 @@ class Speck:
     # Aliases ---------------------------------------
 
     def astro(self, *args, **kwargs):
-        self.astronomy(*args, **kwargs)
+        return self.astronomy(*args, **kwargs)
 
     def ip(self, *args, **kwargs):
-        self.ip_lookup(*args, **kwargs)
+        return self.ip_lookup(*args, **kwargs)
 
     def tz(self, *args, **kwargs):
-        self.timezone_info(*args, **kwargs)
+        return self.timezone_info(*args, **kwargs)
 
     def sports(self, *args, **kwargs):
-        self.sports_lookup(*args, **kwargs)
+        return self.sports_lookup(*args, **kwargs)
