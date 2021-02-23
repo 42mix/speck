@@ -26,7 +26,7 @@ class Location(BasePoint): # Inheritance only to implement `from_raw` and `from_
         self.region = region
         self.country = country
         self.tz_id = tz_id
-        self.localtime = dt.strptime(localtime, "%Y-%m-%d %H:%M")
+        self.localtime = dt.strptime(localtime, "%Y-%m-%d %H:%M") if localtime else None
 
     @classmethod
     def from_raw(cls, data):
@@ -158,3 +158,19 @@ class DailyPoint(BasePoint):
                 self.hour.append(i)
             else:
                 self.hour.append(HourlyPoint.from_raw(location, i))
+
+class IpPoint(BasePoint):
+    def __init__(self, ip, type, continent_code, continent_name, country_code, country_name, is_eu, geoname_id, city, region, lat, lon, tz_id, *args, **kwargs):
+        self.location = Location(lat, lon, city, region=region, country=country_name, tz_id=tz_id)
+        self.ip = ip
+        self.type = type
+
+    @classmethod
+    def from_raw(cls, data):
+        """Return `Location` object from json converted `weatherapi` response."""
+        return cls(**data)
+
+    @classmethod
+    def from_json(cls, data):
+        """Return `Location` object from raw `weatherapi` response."""
+        return cls(**json.loads(data))
