@@ -2,7 +2,7 @@
 
 #
 
-Simple Python API wrapper for [WeatherAPI.com](https://www.weatherapi.com/). Implementations are incomplete as of now.
+Simple Python API wrapper for [WeatherAPI.com](https://www.weatherapi.com/).
 
 City Data
 ---------
@@ -16,3 +16,13 @@ python -m pip install -r requirements.txt
 ```
 
 Additionally, [tkinter](https://wiki.python.org/moin/TkInter) is required.
+
+Notes
+-----
+- Some WeatherAPI API implementations have not been tested, due to time constraints. These need to be tested:
+  - [ ] Search and Autocomplete API
+  - [ ] IP lookup API
+  - [ ] History API
+  - [ ] Sports API
+
+- UI implementation is incomplete
