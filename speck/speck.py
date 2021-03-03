@@ -71,6 +71,8 @@ class Speck:
             i for i in self.cities if loc.lower() in i['name'].lower() # Generates a list of city names containing the string `loc`
         ]
 
+    # All these implementations are blocking
+
     def current(self, loc):
         """
         Get current weather conditions in a location.
@@ -150,7 +152,7 @@ class Speck:
 
         return res
 
-    def astro(self, loc):
+    def astronomy(self, loc):
         """
         Get current astronomy information in a location.
 
@@ -168,13 +170,182 @@ class Speck:
 
         response = self.__make_request('astronomy.json', f'?key={self.token}&q={loc}')
 
-        res = types.AstroPoint.from_raw(response["location"], response["astronomy"]["astro"])
-
         e = Speck.__error_code_to_error(response)
         if e:
             raise e
+
+        res = types.AstroPoint.from_raw(response["location"], response["astronomy"]["astro"])
 
         self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
         self.cache.dump(mode, response)
 
         return res
+
+    def ip_lookup(self, ip):
+        """
+        Get information for an IP address.
+
+        Paramters
+        ---------
+        * **ip:** IP address string
+        """
+        mode = f"iplookup-{ip}"
+
+        n = self.cache.read(mode)
+        if n:
+            res = types.IpPoint.from_raw(n)
+
+            return res
+
+        response = self.__make_request('ip.json', f'?key={self.token}&q={ip}')
+
+        e = Speck.__error_code_to_error(response)
+        if e:
+            raise e
+
+        res = types.IpPoint.from_raw(response)
+
+        # self.cache.cleanup(mode) # We don't need this here
+        self.cache.dump(mode, response)
+
+        return res
+
+    def search(self, loc):
+        """
+        Get an array of location objects based on query parameter.
+
+        Paramters
+        ---------
+        * **loc:** Query parameter based on which data is sent back. See docs on method `current` for more info.
+        """
+        mode = f"search-{loc}"
+
+        n = self.cache.read(mode)
+        if n:
+            res = []
+
+            for i in n:
+                res.append(types.Location.from_raw(i))
+
+            return res
+
+        response = self.__make_request('search.json', f'?key={self.token}&q={loc}')
+
+        e = Speck.__error_code_to_error(response)
+        if e:
+            raise e
+
+        res = []
+
+        for i in response:
+            res.append(types.Location.from_raw(i))
+
+        # self.cache.cleanup(mode) # We don't need this here
+        self.cache.dump(mode, response)
+
+        return res
+
+    def timezone_info(self, loc):
+        """
+        Get timezone information for a location.
+
+        Paramters
+        ---------
+        * **loc:** Query parameter based on which data is sent back. See docs on method `current` for more info.
+        """
+        # No cache
+
+        response = self.__make_request('timezone.json', f'?key={self.token}&q={loc}')
+
+        e = Speck.__error_code_to_error(response)
+        if e:
+            raise e
+
+        return types.TimeZonePoint.from_raw(response)
+
+    def sports_lookup(self, loc):
+        """
+        Get listing of all upcoming sports events for football, cricket and golf.
+        Judging from the behaviour of the WeatherAPI Sports API, parameter `loc` doesn't actually matter but is required anyway.
+
+        Paramters
+        ---------
+        * **loc:** Query parameter based on which data is sent back. See docs on method `current` for more info.
+        """
+        mode = f"sports-{loc}-now-{str(dt.now()).split()[0]}"
+        
+        n = self.cache.read(mode)
+        if n:
+            # If cache exists (not None), it will be read and an `HourlyPoint` object will be returned
+            res = types.SportEventPoint.from_raw(n)
+
+            return res
+
+        response = self.__make_request('sports.json', f'?key={self.token}&q={loc}')
+
+        with open("sample.json", 'w') as f:
+            json.dump(response, f, indent=4)
+
+        e = Speck.__error_code_to_error(response)
+        if e:
+            raise e # We're not going to handle the error here, so anyone using the function can do it themselves
+
+        res = types.SportEventPoint.from_raw(response) # Creates the `HourlyPoint` object
+
+        self.cache.cleanup(mode.split('-now-')[0] + '-now-*') # Discard any old cache
+        self.cache.dump(mode, response) # Writes cache
+
+        return res
+
+    def history(self, loc, dt):
+        """
+        Get weather history for a location.
+
+        Paramters
+        ---------
+        * **loc:** Query parameter based on which data is sent back. See docs on method `current` for more info.
+
+        * **dt:** Restrict number of days of history to fetch. Should be on or after 2015-01-01.
+
+        # WARNING: This method has not been tested.
+        """
+        mode = f"history-{loc}-now-{str(dt.now()).split()[0]}-{dt}"
+
+        n = self.cache.read(mode)
+        if n:
+            res = []
+
+            for i in n["forecast"]["forecastday"]:
+                res.append(types.DailyPoint(n["location"], i["day"], i["astro"], i["hour"]))
+
+            return res
+
+        response = self.__make_request('history.json', f'?key={self.token}&q={loc}&dt={min(dt, 10)}')
+
+        e = Speck.__error_code_to_error(response)
+        if e:
+            raise e
+
+        res = []
+
+        for i in response["forecast"]["forecastday"]: # `forecast->forecastday` is a list of all daily forecasts
+            res.append(types.DailyPoint(response["location"], i["day"], i["astro"], i["hour"]))
+
+        self.cache.cleanup(mode.split('-now-')[0] + '-now-*')
+        self.cache.dump(mode, response)
+
+        return res
+
+    # Aliases ---------------------------------------
+
+    def astro(self, *args, **kwargs):
+        return self.astronomy(*args, **kwargs)
+
+    def ip(self, *args, **kwargs):
+        return self.ip_lookup(*args, **kwargs)
+
+    def tz(self, *args, **kwargs):
+        return self.timezone_info(*args, **kwargs)
+
+    def sports(self, *args, **kwargs):
+        return self.sports_lookup(*args, **kwargs)
