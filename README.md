@@ -25,4 +25,9 @@ Notes
   - [ ] History API
   - [ ] Sports API
 
-- UI implementation is incomplete
+- UI is incomplete
+
+Acknowledgements
+----------------
+* [42mix](https://github.com/42mix): initial work and backend for `speck`. Application API.
+* [FaZe-Vulcan](https://github.com/FaZe-Vulcan): Tkinter UI implementation.
